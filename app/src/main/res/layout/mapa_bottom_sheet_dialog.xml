@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp">
+
+        <!--image view for displaying course image-->
+
+
+
+        <ImageView
+            android:id="@+id/mapa_peixe_item_imagem"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_margin="10dp"
+
+            />
+
+        <!--text view for displaying course name-->
+
+        <TextView
+            android:id="@+id/mapa_peixe_item_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_toEndOf="@id/mapa_peixe_item_imagem"
+            android:layout_toRightOf="@id/mapa_peixe_item_imagem"
+            tools:text="DSA Self Paced Course"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!--text view for displaying course tracks-->
+        <TextView
+            android:id="@+id/mapa_peixe_item_tamanho"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/mapa_peixe_item_data"
+            android:layout_marginTop="10dp"
+            android:layout_toEndOf="@id/mapa_peixe_item_imagem"
+            android:layout_toRightOf="@id/mapa_peixe_item_imagem"
+            tools:text="Course Tracks : 30"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <!--text view for displaying course duration-->
+        <TextView
+            android:id="@+id/mapa_peixe_item_peso"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/mapa_peixe_item_tamanho"
+            android:layout_marginTop="10dp"
+            android:layout_toEndOf="@id/mapa_peixe_item_imagem"
+            android:layout_toRightOf="@id/mapa_peixe_item_imagem"
+            tools:text="Course Duration : 4 Months"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <!--button for dismissing our dialog-->
+        <Button
+            android:id="@+id/mapa_peixe_item_botao_detalhes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/mapa_peixe_item_imagem"
+            android:layout_margin="10dp"
+            android:text="Detalhes"
+            android:textAllCaps="false" />
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
+</LinearLayout>
+

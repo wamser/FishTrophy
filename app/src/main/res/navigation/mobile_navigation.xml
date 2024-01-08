@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_mapa">
+
+    <fragment
+        android:id="@+id/navigation_mapa"
+        android:name="com.fishtrophy.ui.mapa.MapaFragment"
+        android:label="@string/title_mapa"
+        tools:layout="@layout/fragment_mapa" >
+        <action
+            android:id="@+id/action_navigation_mapa_to_peixeDetalhesFragment"
+            app:destination="@id/peixeDetalhesFragment" />
+        <action
+            android:id="@+id/action_navigation_mapa_to_peixeCadastroFragment"
+            app:destination="@id/peixeCadastroFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_peixe"
+        android:name="com.fishtrophy.ui.peixe.PeixeFragment"
+        android:label="@string/title_peixe"
+        tools:layout="@layout/fragment_peixe">
+        <action
+            android:id="@+id/action_navigation_peixe_to_peixeCadastroFragment"
+            app:destination="@id/peixeCadastroFragment" />
+        <action
+            android:id="@+id/action_navigation_peixe_to_peixeDetalhesFragment"
+            app:destination="@id/peixeDetalhesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/peixeCadastroFragment"
+        android:name="com.fishtrophy.ui.peixe.PeixeCadastroFragment"
+        android:label="@string/title_peixe_register">
+        <argument
+            android:name="IdPeixe"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_peixeCadastroFragment_to_peixeCadastroMapaFragment"
+            app:destination="@id/peixeCadastroMapaFragment" />
+        <action
+            android:id="@+id/action_peixeCadastroFragment_to_peixeImagemFragment"
+            app:destination="@id/peixeImagemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/peixeDetalhesFragment"
+        android:name="com.fishtrophy.ui.peixe.PeixeDetalhesFragment"
+        android:label="@string/title_peixe_details">
+        <argument
+            android:name="IdPeixe"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_peixeDetalhesFragment_to_peixeImagemFragment"
+            app:destination="@id/peixeImagemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/equipamentoCadastroFragment"
+        android:name="com.fishtrophy.ui.equipamento.EquipamentoCadastroFragment"
+        android:label="@string/title_equipamento_register">
+        <argument
+            android:name="IdEquipamento"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_equipamentoCadastroFragment_to_equipamentoImagemFragment"
+            app:destination="@id/equipamentoImagemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_equipamento"
+        android:name="com.fishtrophy.ui.equipamento.EquipamentoFragment"
+        android:label="@string/title_equipamento"
+        tools:layout="@layout/fragment_equipamento" >
+        <action
+            android:id="@+id/action_navigation_equipamento_to_equipamentoCadastroFragment"
+            app:destination="@id/equipamentoCadastroFragment" />
+        <action
+            android:id="@+id/action_navigation_equipamento_to_equipamentoDetalhesFragment"
+            app:destination="@id/equipamentoDetalhesFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/equipamentoDetalhesFragment"
+        android:name="com.fishtrophy.ui.equipamento.EquipamentoDetalhesFragment"
+        android:label="@string/title_equipamento_details">
+        <argument
+            android:name="IdEquipamento"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_equipamentoDetalhesFragment_to_equipamentoImagemFragment"
+            app:destination="@id/equipamentoImagemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/peixeCadastroMapaFragment"
+        android:name="com.fishtrophy.ui.peixe.PeixeCadastroMapaFragment"
+        android:label="@string/title_peixe_register" >
+        <argument
+            android:name="idPeixe"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/peixeImagemFragment"
+        android:name="com.fishtrophy.ui.peixe.PeixeImagemFragment"
+        android:label="@string/title_peixe_register_image">
+        <argument
+            android:name="idPeixe"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/equipamentoImagemFragment"
+        android:name="com.fishtrophy.ui.equipamento.EquipamentoImagemFragment"
+        android:label="@string/title_equipamento_register_image">
+        <argument
+            android:name="IdEquipamento"
+            app:argType="integer" />
+    </fragment>
+</navigation>

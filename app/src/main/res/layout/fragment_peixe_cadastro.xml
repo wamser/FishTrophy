@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".ui.activity.fragment_peixe_cadastro">
+
+        <ImageView
+            android:id="@+id/fragment_peixe_cadastro_imagem"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:scaleType="centerInside"
+            android:background="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@tools:sample/backgrounds/scenic"
+            />
+
+
+        <ImageButton
+            android:id="@+id/fragment_peixe_cadastro_botao_foto"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.954"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_imagem"
+            app:srcCompat="@drawable/ic_action_camera"
+            app:tint="@color/grey_60" />
+
+        <ImageButton
+            android:id="@+id/fragment_cadastro_peixe_botao_galeria"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.045"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_imagem"
+            app:srcCompat="@drawable/ic_action_photo_library"
+            app:tint="@color/grey_60" />
+
+        <Spinner
+            android:id="@+id/fragment_peixe_cadastro_sexo"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_botao_foto"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_peixe_cadastro_data_captura"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="321dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_sexo">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_peixe_textinputlayout_data_captura"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Data da Captura"
+                android:inputType="date" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/fragment_cadastro_peixe_botao_data"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="21dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:srcCompat="@drawable/ic_action_calendario"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_sexo"
+            app:layout_constraintLeft_toRightOf="@id/fragment_peixe_cadastro_data_captura"
+            app:tint="@color/grey_60" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_peixe_cadastro_hora_captura"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="321dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_data_captura">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_peixe_textinputlayout_hora_captura"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Hora da Captura"
+                android:inputType="time" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/fragment_cadastro_peixe_botao_hora"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="21dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:srcCompat="@drawable/ic_action_relogio"
+            app:layout_constraintTop_toBottomOf="@id/fragment_cadastro_peixe_botao_data"
+            app:layout_constraintLeft_toRightOf="@id/fragment_peixe_cadastro_hora_captura"
+            app:tint="@color/grey_60" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_peixe_cadastro_peso"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_hora_captura">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_peixe_textinputlayout_peso"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Peso (KG)"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_peixe_cadastro_tamanho"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_peso">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_peixe_textinputlayout_tamanho"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tamanho (CM)"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Spinner
+            android:id="@+id/fragment_peixe_cadastro_vara"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_tamanho"/>
+
+        <Spinner
+            android:id="@+id/fragment_peixe_cadastro_recolhimento"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_vara"/>
+
+        <Spinner
+            android:id="@+id/fragment_peixe_cadastro_isca"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_recolhimento"/>
+
+
+        <androidx.fragment.app.FragmentContainerView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            class="com.google.android.gms.maps.SupportMapFragment"
+            android:id="@+id/fragment_peixe_textinputlayout_mapa"
+            android:layout_width="match_parent"
+            android:tag="mapFragment"
+            android:layout_margin="16dp"
+            android:layout_height="135dp"
+            tools:ignore="MissingConstraints"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_isca"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+
+
+
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView >

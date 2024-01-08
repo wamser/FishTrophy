@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="fragment_equipamento_cadastro_tipo_array">
+        <item>Isca</item>
+        <item>Vara</item>
+        <item>Carretilha</item>
+        <item>Molinete</item>
+    </string-array>
+</resources>
