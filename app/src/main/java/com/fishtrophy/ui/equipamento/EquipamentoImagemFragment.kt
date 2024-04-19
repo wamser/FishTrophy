@@ -17,7 +17,6 @@ import com.fishtrophy.model.Equipamento
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 
-@Suppress("DEPRECATION")
 class EquipamentoImagemFragment: Fragment() {
     private val args : EquipamentoImagemFragmentArgs by navArgs()
     private var _binding: FragmentEquipamentoImagemBinding? = null
@@ -41,7 +40,6 @@ class EquipamentoImagemFragment: Fragment() {
         if(idEquipamento.toInt()!=0) {
             buscaEquipamento()
         }
-        //toolBar.visibility = View.GONE
         navView.visibility = View.GONE
 
         return root
@@ -51,7 +49,6 @@ class EquipamentoImagemFragment: Fragment() {
     private fun buscaEquipamento() {
         lifecycleScope.launch {
             equipamentoDao.buscaPorId(idEquipamento).collect{ it->
-                //withContext(Dispatchers.Main) {
                 it?.let {
 
                     preencheCampos(it)
@@ -72,9 +69,9 @@ class EquipamentoImagemFragment: Fragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun preencheCampos(EquipamentoCarregado: Equipamento) {
+    private fun preencheCampos(equipamentoCarregado: Equipamento) {
 
-        binding.fragmentEquipamentoImagemImageview.tentaCarregarImagem(EquipamentoCarregado.diretorioImagem)
+        binding.fragmentEquipamentoImagemImageview.tentaCarregarImagem(equipamentoCarregado.diretorioImagem)
 
     }
 

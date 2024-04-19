@@ -17,7 +17,6 @@ import com.fishtrophy.model.Peixe
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 
-@Suppress("DEPRECATION")
 class PeixeImagemFragment : Fragment() {
     private val args : PeixeImagemFragmentArgs by navArgs()
     private var _binding: FragmentPeixeImagemBinding? = null
@@ -35,14 +34,12 @@ class PeixeImagemFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         tentaCarregarPeixe()
-        //val toolBar = requireActivity().findViewById<Top>(R.id.toolbar)
         val navView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
         _binding = FragmentPeixeImagemBinding.inflate(inflater, container, false)
         val root: View = binding.root
         if(idPeixe.toInt()!=0) {
             buscaPeixe()
         }
-        //toolBar.visibility = View.GONE
         navView.visibility = View.GONE
 
         return root
@@ -51,8 +48,8 @@ class PeixeImagemFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun buscaPeixe() {
         lifecycleScope.launch {
-            peixeDao.buscaPorId(idPeixe).collect{it->
-                //withContext(Dispatchers.Main) {
+            peixeDao.buscaPorId(idPeixe).collect{ it->
+
                 it?.let {
 
                     preencheCampos(it)
@@ -73,9 +70,9 @@ class PeixeImagemFragment : Fragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun preencheCampos(PeixeCarregado: Peixe) {
+    private fun preencheCampos(peixeCarregado: Peixe) {
 
-        binding.fragmentPeixeImagemImageview.tentaCarregarImagem(PeixeCarregado.diretorioImagem)
+        binding.fragmentPeixeImagemImageview.tentaCarregarImagem(peixeCarregado.diretorioImagem)
 
     }
 

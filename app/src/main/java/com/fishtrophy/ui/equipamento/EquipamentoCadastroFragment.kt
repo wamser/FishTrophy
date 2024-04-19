@@ -32,12 +32,10 @@ import com.fishtrophy.R
 import com.fishtrophy.databinding.FragmentEquipamentoCadastroBinding
 import com.fishtrophy.extentions.tentaCarregarImagem
 import com.fishtrophy.model.Equipamento
-import com.fishtrophy.ui.peixe.PeixeCadastroFragmentDirections
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.sql.Time
 import java.util.UUID
 
 
@@ -49,15 +47,11 @@ class EquipamentoCadastroFragment : Fragment() {
     private val args : EquipamentoCadastroFragmentArgs by navArgs()
     private var _binding: FragmentEquipamentoCadastroBinding? = null
     private val binding: FragmentEquipamentoCadastroBinding get() = _binding!!
-    private var url: String? = null
     private var idEquipamento= 0L
     private val equipamentoDao by lazy {
         val db = AppDatabase.instancia(this.requireActivity().baseContext)
         db.equipamentoDao()
     }
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,22 +59,21 @@ class EquipamentoCadastroFragment : Fragment() {
 
     }
 
-    // This function creates a folder in the app directory
-    private fun createFolderInAppDirectory(context: Context, folderName: String): File? {
-        val appDirectory = context.filesDir // This gets the app's internal storage directory
+    private fun criaPastaDiretorioApp(context: Context, folderName: String): File? {
+        val appDirectory = context.filesDir
         val folder = File(appDirectory, folderName)
 
-        if (!folder.exists()) {
-            val isDirectoryCreated = folder.mkdir() // Create the folder
+        return if (!folder.exists()) {
+            val isDirectoryCreated = folder.mkdir()
             if (isDirectoryCreated) {
-                return folder
+                folder
             } else {
-                // Handle the case where folder creation failed
-                return null
+
+                null
             }
         } else {
-            // The folder already exists
-            return folder
+
+            folder
         }
     }
 
@@ -102,7 +95,7 @@ class EquipamentoCadastroFragment : Fragment() {
 
         }
 
-        binding.fragmentEquipamentoCadastroImagem.setOnClickListener(){
+        binding.fragmentEquipamentoCadastroImagem.setOnClickListener{
             val direction = EquipamentoCadastroFragmentDirections.actionEquipamentoCadastroFragmentToEquipamentoImagemFragment(
                 idEquipamento.toInt()
             )
@@ -120,14 +113,10 @@ class EquipamentoCadastroFragment : Fragment() {
     private fun buscaPeixe() {
         lifecycleScope.launch {
             equipamentoDao.buscaPorId(idEquipamento).collect{ it->
-                //withContext(Dispatchers.Main) {
                 it?.let {
 
                     preencheCampos(it)
                 }
-                //val navController = findNavController()
-                //navController.navigate(R.id.nav_animal)
-                // }
             }
         }
 
@@ -136,7 +125,9 @@ class EquipamentoCadastroFragment : Fragment() {
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
 
-        inflater.inflate(com.fishtrophy.R.menu.bottom_options_menu_fragment_peixe_cadastro,menu)
+
+        inflater.inflate(R.menu.bottom_options_menu_fragment_peixe_cadastro,menu)
+
         return super.onCreateOptionsMenu(menu,inflater)
     }
 
@@ -164,9 +155,7 @@ class EquipamentoCadastroFragment : Fragment() {
             binding.fragmentEquipamentoCadastroDescricao.editText?.requestFocus()
         }else{
             lifecycleScope.launch {
-                //usuario.value?.let {
                 tentaSalvarEquipamento()
-                //}
             }
         }
 
@@ -179,10 +168,8 @@ class EquipamentoCadastroFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private suspend fun tentaSalvarEquipamento() {
-        //usuario.value?.let { usuario ->
         val navController = findNavController()
         try {
-            //val usuarioId = defineUsuarioId(usuario)
             val equipamento = criaEquipamento()
 
             equipamentoDao.salva(equipamento)
@@ -197,24 +184,18 @@ class EquipamentoCadastroFragment : Fragment() {
 
     private fun configuraDropDownTipo() {
         val spinner: Spinner = binding.fragmentEquipamentoCadastroTipo
-// Create an ArrayAdapter using the string array and a default spinner layout
+
         ArrayAdapter.createFromResource(
             this.requireActivity().baseContext,
-            com.fishtrophy.R.array.fragment_equipamento_cadastro_tipo_array,
+            R.array.fragment_equipamento_cadastro_tipo_array,
             android.R.layout.simple_spinner_item
         ).also { adapter ->
-            // Specify the layout to use when the list of choices appears
+
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
+
             spinner.adapter = adapter
         }
 
-        //campoUsuarioId.
-        /*campoUsuarioId.setOnFocusChangeListener { _, focado ->
-            if (!focado) {
-                usuarioExistenteValido(usuarios)
-            }
-        }*/
     }
 
     private fun configuraBotaoFoto() {
@@ -250,44 +231,50 @@ class EquipamentoCadastroFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SimpleDateFormat")
     private fun criaEquipamento(): Equipamento {
-        var imgDiretorio:String=""
-        val bitmap:Bitmap
+        var imgDiretorio = ""
+        val bitmap: Bitmap
         val campoTipo =
             binding.fragmentEquipamentoCadastroTipo
-        var tipo = campoTipo.selectedItem.toString() //getEditText()?.text.toString()
+        var tipo = campoTipo.selectedItem.toString()
 
-        if(tipo=="Isca"){
-            tipo ="1"
-        }else if(tipo=="Vara"){
-            tipo ="2"
-        }else if(tipo=="Carretilha"){
-            tipo ="3"
-        }else if(tipo=="Molinete"){
-            tipo ="4"
+        when (tipo) {
+            "Isca" -> {
+                tipo = "1"
+            }
+
+            "Vara" -> {
+                tipo = "2"
+            }
+
+            "Carretilha" -> {
+                tipo = "3"
+            }
+
+            "Molinete" -> {
+                tipo = "4"
+            }
         }
 
         val campoDescricao =
             binding.fragmentEquipamentoCadastroDescricao
         val descricao = campoDescricao.editText?.text.toString()
 
-        val imgDrawable=binding.fragmentEquipamentoCadastroImagem.getDrawable()
-        if(imgDrawable!=null) {
+        val imgDrawable = binding.fragmentEquipamentoCadastroImagem.getDrawable()
+        if (imgDrawable != null) {
             bitmap = (imgDrawable as BitmapDrawable).bitmap
             val saida = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, saida)
             val img = saida.toByteArray()
-            imgDiretorio = gravaImagemDiretorio(this.requireActivity().baseContext,idEquipamento,img)
+            imgDiretorio = gravaImagemDiretorio(img)
         }
 
 
-         val equipamento=Equipamento(
-            id = idEquipamento,
-            descricao=descricao,
-            tipo = tipo,
-            diretorioImagem=imgDiretorio
-            //usuarioId = usuarioId?.toString()
-        )
-        return equipamento
+        return Equipamento(
+           id = idEquipamento,
+           descricao = descricao,
+           tipo = tipo,
+           diretorioImagem = imgDiretorio
+       )
     }
 
     private fun tentaCarregarEquipamento() {
@@ -295,58 +282,51 @@ class EquipamentoCadastroFragment : Fragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun preencheCampos(EquipamentoCarregado: Equipamento) {
+    private fun preencheCampos(equipamentoCarregado: Equipamento) {
 
-
-        val spinner= binding.fragmentEquipamentoCadastroTipo
         val adapter = ArrayAdapter.createFromResource(
             this.requireActivity().baseContext,
-            com.fishtrophy.R.array.fragment_equipamento_cadastro_tipo_array,
+            R.array.fragment_equipamento_cadastro_tipo_array,
             android.R.layout.simple_spinner_item)
-        var tipo = EquipamentoCarregado.tipo
-        if(EquipamentoCarregado.tipo=="1"){
-            tipo ="Isca"
-        }else if(EquipamentoCarregado.tipo=="2"){
-            tipo ="Vara"
-        }else if(EquipamentoCarregado.tipo=="3"){
-            tipo ="Carretilha"
-        }else if(EquipamentoCarregado.tipo=="4"){
-            tipo ="Molinete"
+        var tipo = equipamentoCarregado.tipo
+        when (equipamentoCarregado.tipo) {
+            "1" -> {
+                tipo ="Isca"
+            }
+            "2" -> {
+                tipo ="Vara"
+            }
+            "3" -> {
+                tipo ="Carretilha"
+            }
+            "4" -> {
+                tipo ="Molinete"
+            }
         }
         val spinnerPosition: Int = adapter.getPosition(tipo)
 
         binding.fragmentEquipamentoCadastroTipo.setSelection(spinnerPosition)
-        binding.fragmentEquipamentoCadastroImagem.tentaCarregarImagem(EquipamentoCarregado.diretorioImagem)
-        binding.fragmentEquipamentoCadastroDescricao.editText?.setText(EquipamentoCarregado.descricao)
+        binding.fragmentEquipamentoCadastroImagem.tentaCarregarImagem(equipamentoCarregado.diretorioImagem)
+        binding.fragmentEquipamentoCadastroDescricao.editText?.setText(equipamentoCarregado.descricao)
 
     }
 
-   private fun gravaImagemDiretorio(context:Context, id:Long, binario:ByteArray):String {
+   private fun gravaImagemDiretorio( binario:ByteArray):String {
 
-        //var idMax=0L
-
-        //if(id.toInt()==0){
-            //lifecycleScope.launch {
-            //CoroutineScope(Dispatchers.IO).launch {
-                //idMax=equipamentoDao.buscaMaxId()
-            //}
-
-        //}
-
-        val directory = createFolderInAppDirectory(this.requireActivity().baseContext, "imagens/equipamento/")
-        //val fileName = id.toString()+"-"+Time(System.currentTimeMillis()).getHours()+Time(System.currentTimeMillis()).getMinutes()+Time(System.currentTimeMillis()).getSeconds()
+       val directory = criaPastaDiretorioApp(this.requireActivity().baseContext, "imagens/equipamento/")
        val fileName = UUID.randomUUID().toString()
        val file = File(directory, fileName)
 
-        try {
-            val outputStream = FileOutputStream(file)
-            outputStream.write(binario)
-            outputStream.close()
-            return directory.toString()+"/"+fileName
-        } catch (e: IOException) {
-            e.printStackTrace()
-            return ""
-        }
+       return try {
+           val outputStream = FileOutputStream(file)
+           outputStream.write(binario)
+           outputStream.close()
+           directory.toString()+"/"+fileName
+       } catch (e: IOException) {
+           e.printStackTrace()
+           ""
+       }
 
     }
+
 }

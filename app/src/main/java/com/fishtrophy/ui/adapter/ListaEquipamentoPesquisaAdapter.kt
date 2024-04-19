@@ -1,6 +1,5 @@
 package com.fishtrophy.ui.adapter
 
-
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
@@ -9,37 +8,25 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.PopupMenu
-import androidx.navigation.Navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.fishtrophy.R
-import com.fishtrophy.database.AppDatabase
-import com.fishtrophy.databinding.EquipamentoItemBinding
+import com.fishtrophy.databinding.FragmentEquipamentoPesquisaItemBinding
 import com.fishtrophy.extentions.tentaCarregarImagem
 import com.fishtrophy.model.Equipamento
-import com.fishtrophy.ui.equipamento.EquipamentoFragmentDirections
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
-
-class ListaEquipamentoAdapter(
+class ListaEquipamentoPesquisaAdapter(
     private val context: Context,
     equipamento: List<Equipamento> = emptyList(),
     var quandoClicaNoItemListener: (equipamento: Equipamento) -> Unit = {}
-) : RecyclerView.Adapter<ListaEquipamentoAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<ListaEquipamentoPesquisaAdapter.ViewHolder>() {
 
-    private var equipamentos = equipamento.toMutableList()
-    private var equipamentosFiltrados = equipamento.toMutableList()
-
-    private val equipamentoDao by lazy {
-        AppDatabase.instancia(this.context).equipamentoDao()
-    }
+    private var equipamentosPesquisa = equipamento.toMutableList()
+    private var equipamentosPesquisaFiltrados = equipamento.toMutableList()
 
 
-    inner class ViewHolder(private val binding: EquipamentoItemBinding) :
+    inner class ViewHolder(private val binding: FragmentEquipamentoPesquisaItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         private lateinit var equipamento: Equipamento
@@ -53,7 +40,7 @@ class ListaEquipamentoAdapter(
 
             itemView.setOnLongClickListener {
                 if (::equipamento.isInitialized) {
-                    mostraPopup(itemView, equipamento)
+                    mostraPopUp(itemView)
                 }
                 return@setOnLongClickListener true
             }
@@ -64,10 +51,10 @@ class ListaEquipamentoAdapter(
         fun vincula(equipamento: Equipamento) {
             this.equipamento = equipamento
 
-            val descricao = binding.equipamentoItemDescricao
+            val descricao = binding.equipamentoPesquisaItemDescricao
             descricao.text = equipamento.descricao
 
-            val tipo = binding.equipamentoItemTipo
+            val tipo = binding.equipamentoPesquisaItemTipo
             when (equipamento.tipo) {
                 "1" -> {
                     tipo.text = "Isca"
@@ -89,8 +76,8 @@ class ListaEquipamentoAdapter(
                 View.GONE
             }
 
-            binding.equipamentoItemImagem.visibility = visibilidade
-            binding.equipamentoItemImagem.tentaCarregarImagem(equipamento.diretorioImagem)
+            binding.equipamentoPesquisaItemImagem.visibility = visibilidade
+            binding.equipamentoPesquisaItemImagem.tentaCarregarImagem(equipamento.diretorioImagem)
         }
 
 
@@ -98,37 +85,37 @@ class ListaEquipamentoAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val inflater = LayoutInflater.from(context)
-        val binding = EquipamentoItemBinding.inflate(inflater, parent, false)
+        val binding = FragmentEquipamentoPesquisaItemBinding.inflate(inflater, parent, false)
         return ViewHolder(binding)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val equipamento = equipamentosFiltrados[position]
+        val equipamento = equipamentosPesquisaFiltrados[position]
         holder.vincula(equipamento)
     }
 
-    override fun getItemCount(): Int = equipamentosFiltrados.size
+    override fun getItemCount(): Int = equipamentosPesquisaFiltrados.size
 
     fun atualiza(equipamentos: List<Equipamento>) {
-        this.equipamentos.clear()
-        this.equipamentos.addAll(equipamentos)
-        this.equipamentosFiltrados.clear()
-        this.equipamentosFiltrados.addAll(equipamentos)
+        this.equipamentosPesquisa.clear()
+        this.equipamentosPesquisa.addAll(equipamentos)
+        this.equipamentosPesquisaFiltrados.clear()
+        this.equipamentosPesquisaFiltrados.addAll(equipamentos)
         notifyDataSetChanged()
     }
 
     @SuppressLint("NotifyDataSetChanged")
     fun filtra(query: String) {
 
-        this.equipamentosFiltrados =
-            this.equipamentos.filter { it.descricao.contains(query, ignoreCase = true) || it.tipo.contains(query, ignoreCase = true) }
+        this.equipamentosPesquisaFiltrados =
+            this.equipamentosPesquisa.filter { it.descricao.contains(query, ignoreCase = true) || it.tipo.contains(query, ignoreCase = true) }
                 .toMutableList()
 
         notifyDataSetChanged()
     }
 
-    fun mostraPopup(v: View, equipamento: Equipamento) {
+    fun mostraPopUp(v: View) {
         val popup = PopupMenu(v.context, v)
         val inflater: MenuInflater = popup.menuInflater
         inflater.inflate(R.menu.menu_detalhes_peixe, popup.menu)
@@ -138,26 +125,11 @@ class ListaEquipamentoAdapter(
             when (item!!.itemId) {
 
                 R.id.menu_detalhes_lista_peixe_editar -> {
-                    val direction =
-                        EquipamentoFragmentDirections.actionNavigationEquipamentoToEquipamentoCadastroFragment(
-                            equipamento.id.toInt()
-                        )
 
-
-                    findNavController(v).navigate(direction)
                 }
 
                 R.id.menu_detalhes_lista_peixe_excluir -> {
 
-
-                    CoroutineScope(Dispatchers.Main).launch {
-
-                        equipamento.let { equipamentoDao.remove(it) }
-
-
-                    }
-                    Toast.makeText(context, "Registro excluído com sucesso!", Toast.LENGTH_SHORT)
-                        .show()
                 }
             }
 

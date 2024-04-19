@@ -9,7 +9,8 @@
     android:clickable="true"
     android:focusable="true"
     android:theme="@style/Theme.MaterialComponents.DayNight"
-    app:cardCornerRadius="8dp">
+    app:cardCornerRadius="8dp"
+    tools:ignore="TouchTargetSizeCheck">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,7 +18,7 @@
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/peixe_item_data_hora"
+            android:id="@+id/equipamento_pesquisa_item_descricao"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
@@ -27,60 +28,31 @@
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/peixe_item_imagem"
+            app:layout_constraintStart_toEndOf="@id/equipamento_pesquisa_item_imagem"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="@tools:sample/lorem/random" />
 
         <TextView
-            android:id="@+id/peixe_item_especie"
+            android:id="@+id/equipamento_pesquisa_item_tipo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
+            android:ellipsize="end"
 
-            android:textSize="18sp"
-            android:textStyle="bold"
-            
-            app:layout_constraintEnd_toEndOf="@id/peixe_item_data_hora"
-            app:layout_constraintStart_toStartOf="@id/peixe_item_data_hora"
-            app:layout_constraintTop_toBottomOf="@id/peixe_item_data_hora"
-            tools:text="Espécie" />
-
-        <TextView
-            android:id="@+id/peixe_item_tamanho"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-
-            android:textColor="@android:color/holo_green_dark"
-            android:textSize="18sp"
-            android:textStyle="bold"
-
-            app:layout_constraintEnd_toEndOf="@id/peixe_item_especie"
-            app:layout_constraintStart_toStartOf="@id/peixe_item_especie"
-            app:layout_constraintTop_toBottomOf="@id/peixe_item_especie"
-            tools:text="19.99" />
-
-        <TextView
-            android:id="@+id/peixe_item_peso"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-
-            android:textColor="@android:color/holo_green_dark"
+            android:maxLines="1"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/peixe_item_tamanho"
-            app:layout_constraintStart_toStartOf="@id/peixe_item_tamanho"
-            app:layout_constraintTop_toBottomOf="@id/peixe_item_tamanho"
-            tools:text="19.99" />
+            app:layout_constraintEnd_toEndOf="@id/equipamento_pesquisa_item_descricao"
+            app:layout_constraintStart_toStartOf="@id/equipamento_pesquisa_item_descricao"
+            app:layout_constraintTop_toBottomOf="@id/equipamento_pesquisa_item_descricao"
+            tools:text="@tools:sample/lorem/random" />
+
 
 
         <ImageView
-            android:id="@+id/peixe_item_imagem"
+            android:id="@+id/equipamento_pesquisa_item_imagem"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scaleType="centerCrop"

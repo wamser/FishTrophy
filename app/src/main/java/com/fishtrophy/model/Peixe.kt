@@ -1,23 +1,14 @@
 package com.fishtrophy.model
 
-import android.annotation.SuppressLint
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.android.gms.maps.model.LatLng
-import org.jetbrains.annotations.Nullable
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 
-@Entity/*(foreignKeys = [
-    ForeignKey(
-        entity = Equipamento::class,
-        parentColumns = ["id"],
-        childColumns = ["idEquipamentoVara"]
-)])*/
+@Entity
+
 class Peixe(
 
     @PrimaryKey(autoGenerate = true) val id:Long = 0L,
@@ -30,7 +21,6 @@ class Peixe(
     val localizacao: LatLng,
     val idEquipamentoVara:Long? =0L,
     val idEquipamentoIsca:Long? = 0L,
-    val idEquipamentoRecolhimento:Long? = 0L
-    //val raca: String,
-    //val usuarioId: String? = null
+    val idEquipamentoRecolhimento:Long? = 0L,
+    val especie: String?
 )
