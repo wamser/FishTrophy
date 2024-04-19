@@ -10,6 +10,13 @@
     <string name="title_equipamento_register">Equipamento Cadastro</string>
     <string name="title_equipamento_details">Equipamento Detalhe</string>
     <string name="title_equipamento_register_image">Imagem</string>
+    <string name="title_equipamento_search">Pesquisa Equipamento</string>
+
+    <string name="title_fragment_peixe_cadastro_radio_sexo_titulo">Sexo:</string>
+    <string name="title_fragment_peixe_cadastro_radio_sexo_indefinido">Indefinido</string>
+    <string name="title_fragment_peixe_cadastro_radio_sexo_macho">Macho</string>
+    <string name="title_fragment_peixe_cadastro_radio_sexo_femea">Fêmea</string>
+
         <string name="title_check">Salvar</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"

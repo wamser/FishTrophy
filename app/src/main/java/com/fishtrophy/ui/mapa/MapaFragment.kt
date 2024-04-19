@@ -2,14 +2,14 @@ package com.fishtrophy.ui.mapa
 
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -29,12 +29,16 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class MapaFragment : Fragment() {
+class MapaFragment() : Fragment(), Parcelable {
 
     private var _binding: FragmentMapaBinding? = null
     private val binding: FragmentMapaBinding get() = _binding!!
     private val peixeDao by lazy {
         AppDatabase.instancia(this.requireContext()).peixeDao()
+    }
+
+    constructor(parcel: Parcel) : this() {
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,23 +71,19 @@ class MapaFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentMapaBinding.inflate(inflater, container, false)
-        val progressBar= binding.loadingProgressBar as ProgressBar //binding.loadingProgressBar
+
 
         val mapFragment =
             childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
         val root: View = binding.root
 
         mapFragment.getMapAsync { googleMap ->
-            progressBar.visibility = View.GONE
             googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
             lifecycleScope.launch {
                 buscaPeixesEMapeia(googleMap)
 
             }
-            /*googleMap.setOnMapLoadedCallback {
-                 progressBar.visibility = View.GONE
-                Toast.makeText(context, "Entrou no setOnMapLoadedCallback", Toast.LENGTH_SHORT).show()
-            }*/
+
             googleMap.setOnMarkerClickListener { marker ->
                 val peixeID = marker.title?.toLong()
                 val bottomSheetFragment = CustomBottomSheetFragment()
@@ -93,7 +93,7 @@ class MapaFragment : Fragment() {
                 }
                 bottomSheetFragment.arguments = bundle
                 bottomSheetFragment.show(parentFragmentManager, bottomSheetFragment.tag)
-                true  // Consume the marker click event
+                true
 
             }
         }
@@ -105,7 +105,7 @@ class MapaFragment : Fragment() {
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
 
-        inflater.inflate(com.fishtrophy.R.menu.bottom_options_menu_fragment_mapa, menu)
+        inflater.inflate(R.menu.bottom_options_menu_fragment_mapa, menu)
         return super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -119,46 +119,54 @@ class MapaFragment : Fragment() {
 
                 val direction =
                     MapaFragmentDirections.actionNavigationMapaToPeixeCadastroFragment(0)
-                    Navigation.findNavController(this.requireView()).navigate(direction)
+                Navigation.findNavController(this.requireView()).navigate(direction)
                 true
             }
+
             R.id.menu_detalhes_fragment_mapa_hybrid -> {
 
-                val mapFragment=childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
+                val mapFragment =
+                    childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
 
-                mapFragment. getMapAsync { googleMap ->
-                    googleMap.mapType=GoogleMap.MAP_TYPE_HYBRID
+                mapFragment.getMapAsync { googleMap ->
+                    googleMap.mapType = GoogleMap.MAP_TYPE_HYBRID
                 }
 
                 true
             }
+
             R.id.menu_detalhes_fragment_mapa_normal -> {
 
-                val mapFragment=childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
+                val mapFragment =
+                    childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
 
 
-                mapFragment. getMapAsync { googleMap ->
-                    googleMap.mapType=GoogleMap.MAP_TYPE_NORMAL
+                mapFragment.getMapAsync { googleMap ->
+                    googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
                 }
 
                 true
             }
+
             R.id.menu_detalhes_fragment_mapa_terrain -> {
 
-                val mapFragment=childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
+                val mapFragment =
+                    childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
 
-                mapFragment. getMapAsync { googleMap ->
-                    googleMap.mapType=GoogleMap.MAP_TYPE_TERRAIN
+                mapFragment.getMapAsync { googleMap ->
+                    googleMap.mapType = GoogleMap.MAP_TYPE_TERRAIN
                 }
 
                 true
             }
+
             R.id.menu_detalhes_fragment_mapa_satellite -> {
 
-                val mapFragment=childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
+                val mapFragment =
+                    childFragmentManager.findFragmentById(binding.fragmentMap.id) as SupportMapFragment
 
-                mapFragment. getMapAsync { googleMap ->
-                    googleMap.mapType=GoogleMap.MAP_TYPE_SATELLITE
+                mapFragment.getMapAsync { googleMap ->
+                    googleMap.mapType = GoogleMap.MAP_TYPE_SATELLITE
                 }
 
                 true
@@ -174,43 +182,56 @@ class MapaFragment : Fragment() {
         _binding = null
     }
 
-    private suspend fun buscaPeixesEMapeia(googleMap:GoogleMap)  {
+    private suspend fun buscaPeixesEMapeia(googleMap: GoogleMap) {
 
         peixeDao.buscaTodos().collect { peixes ->
-            addMarkers(googleMap,peixes)
-            loadCameraOnMap(googleMap,peixes)
+            addMarkers(googleMap, peixes)
+            posicionaMarkerNaTela(googleMap, peixes)
         }
 
     }
 
-   private fun addMarkers(googleMap:GoogleMap,peixes:List<Peixe>){
+    private fun addMarkers(googleMap: GoogleMap, peixes: List<Peixe>) {
 
         peixes.forEach { local ->
             val marker = googleMap.addMarker(
                 MarkerOptions()
-                    .title(local.id.toString())
                     .position(local.localizacao)
+                    .title(local.id.toString())
             )
 
             marker?.tag = local
-            if (marker != null) {
-                marker.showInfoWindow()
-            }
-
         }
-
     }
 
-    private fun loadCameraOnMap(googleMap:GoogleMap,peixes:List<Peixe>){
+    private fun posicionaMarkerNaTela(googleMap: GoogleMap, peixes: List<Peixe>) {
 
         googleMap.setOnMapLoadedCallback {
             val bounds = LatLngBounds.builder()
             peixes.forEach { local ->
                 bounds.include(local.localizacao)
             }
-        if(peixes.isNotEmpty()){
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(),500))
+            if (peixes.isNotEmpty()) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 500))
+            }
         }
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<MapaFragment> {
+        override fun createFromParcel(parcel: Parcel): MapaFragment {
+            return MapaFragment(parcel)
+        }
+
+        override fun newArray(size: Int): Array<MapaFragment?> {
+            return arrayOfNulls(size)
         }
     }
 }

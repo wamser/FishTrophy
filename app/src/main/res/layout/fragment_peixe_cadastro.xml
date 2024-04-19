@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_marginBottom="16dp"
+    android:fillViewport="true"
+    android:id="@+id/fragment_peixe_cadastro_scrollview"
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+
         tools:context=".ui.activity.fragment_peixe_cadastro">
 
         <ImageView
             android:id="@+id/fragment_peixe_cadastro_imagem"
             android:layout_width="0dp"
             android:layout_height="200dp"
-            android:scaleType="centerInside"
             android:background="@color/black"
+            android:scaleType="centerInside"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/backgrounds/scenic"
-            />
+            tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
 
         <ImageButton
@@ -52,16 +55,9 @@
             app:srcCompat="@drawable/ic_action_photo_library"
             app:tint="@color/grey_60" />
 
-        <Spinner
-            android:id="@+id/fragment_peixe_cadastro_sexo"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
 
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_botao_foto"/>
+
+
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_peixe_cadastro_data_captura"
@@ -71,7 +67,7 @@
             android:layout_margin="16dp"
 
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_sexo">
+            app:layout_constraintTop_toBottomOf="@id/fragment_cadastro_peixe_botao_galeria">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/fragment_peixe_textinputlayout_data_captura"
@@ -87,9 +83,9 @@
             android:layout_height="?attr/actionBarSize"
             android:layout_marginTop="21dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:srcCompat="@drawable/ic_action_calendario"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_sexo"
             app:layout_constraintLeft_toRightOf="@id/fragment_peixe_cadastro_data_captura"
+            app:layout_constraintTop_toBottomOf="@id/fragment_cadastro_peixe_botao_galeria"
+            app:srcCompat="@drawable/ic_action_calendario"
             app:tint="@color/grey_60" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -115,10 +111,28 @@
             android:layout_height="?attr/actionBarSize"
             android:layout_marginTop="21dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:srcCompat="@drawable/ic_action_relogio"
-            app:layout_constraintTop_toBottomOf="@id/fragment_cadastro_peixe_botao_data"
             app:layout_constraintLeft_toRightOf="@id/fragment_peixe_cadastro_hora_captura"
+            app:layout_constraintTop_toBottomOf="@id/fragment_cadastro_peixe_botao_data"
+            app:srcCompat="@drawable/ic_action_relogio"
             app:tint="@color/grey_60" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_peixe_cadastro_especie"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_cadastro_peixe_botao_hora">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_peixe_textinputlayout_especie"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Espécie"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_peixe_cadastro_peso"
@@ -128,7 +142,7 @@
             android:layout_margin="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_hora_captura">
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_especie">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/fragment_peixe_textinputlayout_peso"
@@ -156,56 +170,138 @@
                 android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <Spinner
+        <RadioGroup
+            android:id="@+id/fragment_peixe_cadastro_radio_sexo"
+            android:checkedButton="@+id/fragment_peixe_cadastro_radio_sexo_indefinido"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_tamanho">
+            <TextView
+                android:id="@+id/fragment_peixe_cadastro_radio_sexo_titulo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_titulo"
+                />
+            <RadioButton
+                android:id="@+id/fragment_peixe_cadastro_radio_sexo_indefinido"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_indefinido"/>
+            <RadioButton
+                android:id="@+id/fragment_peixe_cadastro_radio_sexo_macho"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_macho"/>
+            <RadioButton
+                android:id="@+id/fragment_peixe_cadastro_radio_sexo_femea"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_femea"/>
+        </RadioGroup>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_peixe_cadastro_vara"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="0dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="321dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-
-            app:layout_constraintEnd_toEndOf="parent"
+            android:enabled="false"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_tamanho"/>
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_radio_sexo"
+            >
 
-        <Spinner
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_peixe_textinputlayout_vara"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Vara"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/fragment_cadastro_peixe_botao_vara"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="21dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintLeft_toRightOf="@id/fragment_peixe_cadastro_vara"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_radio_sexo"
+            app:srcCompat="@drawable/ic_button_search"
+            app:tint="@color/grey_60" />
+
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_peixe_cadastro_recolhimento"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="0dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="321dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-
-            app:layout_constraintEnd_toEndOf="parent"
+            android:enabled="false"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_vara"/>
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_vara">
 
-        <Spinner
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_peixe_textinputlayout_recolhimento"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Recolhimento"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/fragment_cadastro_peixe_botao_recolhimento"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="21dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintLeft_toRightOf="@id/fragment_peixe_cadastro_recolhimento"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_vara"
+            app:srcCompat="@drawable/ic_button_search"
+            app:tint="@color/grey_60" />
+
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_peixe_cadastro_isca"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="0dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="321dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-
-            app:layout_constraintEnd_toEndOf="parent"
+            android:enabled="false"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_recolhimento"/>
+            android:focusable="false"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_recolhimento">
 
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_peixe_textinputlayout_isca"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Isca"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <androidx.fragment.app.FragmentContainerView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            class="com.google.android.gms.maps.SupportMapFragment"
+        <ImageButton
+            android:id="@+id/fragment_cadastro_peixe_botao_isca"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="21dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintLeft_toRightOf="@id/fragment_peixe_cadastro_isca"
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_recolhimento"
+            app:srcCompat="@drawable/ic_button_search"
+            app:tint="@color/grey_60" />
+
+        <androidx.fragment.app.FragmentContainerView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/fragment_peixe_textinputlayout_mapa"
+            class="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:tag="mapFragment"
+            android:layout_height="200dp"
             android:layout_margin="16dp"
-            android:layout_height="135dp"
-            tools:ignore="MissingConstraints"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_isca"
+            android:tag="mapFragment"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-
-
-
-            />
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_isca"
+            tools:ignore="MissingConstraints" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView >
+</ScrollView>

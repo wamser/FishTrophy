@@ -13,8 +13,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.fishtrophy.R
 import com.fishtrophy.database.AppDatabase
+import com.fishtrophy.database.dao.PeixeDao
 import com.fishtrophy.databinding.MapaBottomSheetDialogBinding
-import com.fishtrophy.model.Peixe
 import com.fishtrophy.ui.mapa.MapaFragmentDirections
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -42,13 +42,13 @@ class CustomBottomSheetFragment : BottomSheetDialogFragment() {
         val peixeId =
             arguments?.getLong("peixeID")
         lifecycleScope.launch {
-
+            var peixe:PeixeDao.PeixeWithEquipamento
             if (peixeId != null) {
-                peixeDao.buscaPorId(peixeId).collect { it ->
-                    //withContext(Dispatchers.Main) {
-                    it?.let {
+                peixeDao.buscaPorIdCompleto(peixeId).let { peixeComEquipamento ->
 
-                        preencheCampos(it, view)
+                    peixeComEquipamento.observe(viewLifecycleOwner) { it ->
+                        peixe =it!![0]
+                        preencheCampos(peixe, view)
                     }
 
                 }
@@ -58,7 +58,7 @@ class CustomBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun preencheCampos(PeixeCarregado: Peixe, view: View) {
+    private fun preencheCampos(PeixeCarregado: PeixeDao.PeixeWithEquipamento, view: View) {
 
 
         val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")

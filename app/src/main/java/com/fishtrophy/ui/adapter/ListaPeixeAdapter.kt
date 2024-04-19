@@ -1,5 +1,7 @@
 package com.fishtrophy.ui.adapter
 
+
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.view.LayoutInflater
@@ -11,7 +13,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.PopupMenu
 import androidx.navigation.Navigation.findNavController
-
 import androidx.recyclerview.widget.RecyclerView
 import com.fishtrophy.R
 import com.fishtrophy.database.AppDatabase
@@ -20,13 +21,9 @@ import com.fishtrophy.extentions.formataDuasCasas
 import com.fishtrophy.extentions.tentaCarregarImagem
 import com.fishtrophy.model.Peixe
 import com.fishtrophy.ui.peixe.PeixeFragmentDirections
-import com.google.android.material.bottomnavigation.BottomNavigationView
-
-
-import kotlinx.coroutines.launch
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 
 
@@ -36,7 +33,8 @@ class ListaPeixeAdapter(
     var quandoClicaNoItemListener: (animal: Peixe) -> Unit = {}
 ) : RecyclerView.Adapter<ListaPeixeAdapter.ViewHolder>() {
 
-    private val peixes = peixes.toMutableList()
+    private var peixes = peixes.toMutableList()
+    private var peixesFiltrados = peixes.toMutableList()
 
     private val peixeDao by lazy {
         AppDatabase.instancia(this.context).peixeDao()
@@ -56,7 +54,7 @@ class ListaPeixeAdapter(
 
             itemView.setOnLongClickListener {
                 if(::peixe.isInitialized) {
-                    showPopup(itemView,peixe)
+                    mostraPopUp(itemView,peixe)
                 }
                 return@setOnLongClickListener true
             }
@@ -81,14 +79,11 @@ class ListaPeixeAdapter(
             val peso = binding.peixeItemPeso
             peso.text = peixe.peso.formataDuasCasas()+" KG"
 
-            val visibilidade = if(peixe.diretorioImagem != null){
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            val visibilidade = View.VISIBLE
 
             binding.peixeItemImagem.visibility = visibilidade
             binding.peixeItemImagem.tentaCarregarImagem(peixe.diretorioImagem)
+            binding.peixeItemEspecie.setText(peixe.especie)
        }
 
     }
@@ -101,40 +96,54 @@ class ListaPeixeAdapter(
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val peixe = peixes[position]
+        val peixe = peixesFiltrados[position]
         holder.vincula(peixe)
     }
 
-    override fun getItemCount(): Int = peixes.size
+    override fun getItemCount(): Int = peixesFiltrados.size
 
     fun atualiza(peixes: List<Peixe>) {
         this.peixes.clear()
         this.peixes.addAll(peixes)
+        this.peixesFiltrados.clear()
+        this.peixesFiltrados.addAll(peixes)
         notifyDataSetChanged()
     }
 
-    fun showPopup(v: View,peixe: Peixe) {
+    @SuppressLint("NotifyDataSetChanged")
+    fun filtra(query: String) {
+
+        this.peixesFiltrados =
+            this.peixes.filter { it.especie!!.contains(query, ignoreCase = true) }
+                .toMutableList()
+
+        notifyDataSetChanged()
+    }
+
+    fun mostraPopUp(v: View, peixe: Peixe) {
         val popup = PopupMenu(v.context, v)
         val inflater: MenuInflater = popup.menuInflater
         inflater.inflate(R.menu.menu_detalhes_peixe, popup.menu)
 
-        popup.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item: MenuItem? ->
+        popup.setOnMenuItemClickListener { item: MenuItem? ->
 
             when (item!!.itemId) {
 
                 R.id.menu_detalhes_lista_peixe_editar -> {
-                    val direction = PeixeFragmentDirections.actionNavigationPeixeToPeixeCadastroFragment(
-                        peixe.id.toInt()
-                    )
+                    val direction =
+                        PeixeFragmentDirections.actionNavigationPeixeToPeixeCadastroFragment(
+                            peixe.id.toInt()
+                        )
                     findNavController(v).navigate(direction)
 
                 }
+
                 R.id.menu_detalhes_lista_peixe_excluir -> {
 
 
                     CoroutineScope(Dispatchers.Main).launch {
 
-                        peixe?.let { peixeDao.remove(it) }
+                        peixe.let { peixeDao.remove(it) }
 
 
                     }
@@ -144,7 +153,7 @@ class ListaPeixeAdapter(
             }
 
             true
-        })
+        }
         popup.show()
     }
 

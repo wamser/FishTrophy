@@ -44,6 +44,9 @@
         <action
             android:id="@+id/action_peixeCadastroFragment_to_peixeImagemFragment"
             app:destination="@id/peixeImagemFragment" />
+        <action
+            android:id="@+id/action_peixeCadastroFragment_to_equipamentoPesquisaFragment"
+            app:destination="@id/equipamentoPesquisaFragment" />
     </fragment>
     <fragment
         android:id="@+id/peixeDetalhesFragment"
@@ -112,6 +115,15 @@
         android:label="@string/title_equipamento_register_image">
         <argument
             android:name="IdEquipamento"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/equipamentoPesquisaFragment"
+        android:name="com.fishtrophy.ui.equipamento.EquipamentoPesquisaFragment"
+        android:label="@string/title_equipamento_search"
+        tools:layout="@layout/fragment_equipamento_pesquisa">
+        <argument
+            android:name="tipoEquipamento"
             app:argType="integer" />
     </fragment>
 </navigation>

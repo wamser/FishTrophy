@@ -14,13 +14,11 @@ import com.fishtrophy.model.Peixe
 @Database(entities = [
     Peixe::class,
     Equipamento::class
-    //Usuario::class
-], version = 11, exportSchema = true)
+    ], version = 12, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun peixeDao(): PeixeDao
     abstract fun equipamentoDao(): EquipamentoDao
-    //abstract fun UsuarioDao(): UsuarioDao
 
     companion object {
         @Volatile private var db: AppDatabase?=null
@@ -40,7 +38,9 @@ abstract class AppDatabase : RoomDatabase() {
                 MIGRATION_7_8,
                 MIGRATION_8_9,
                 MIGRATION_9_10,
-                MIGRATION_10_11
+                MIGRATION_10_11,
+                MIGRATION_11_12,
+               // MIGRATION_12_13
               ).build().also{
                 db=it
             }
