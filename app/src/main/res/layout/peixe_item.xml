@@ -11,7 +11,6 @@
     android:theme="@style/Theme.MaterialComponents.DayNight"
     app:cardCornerRadius="8dp">
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -22,7 +21,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:ellipsize="end"
-
             android:maxLines="1"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -37,10 +35,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-
             android:textSize="18sp"
             android:textStyle="bold"
-            
             app:layout_constraintEnd_toEndOf="@id/peixe_item_data_hora"
             app:layout_constraintStart_toStartOf="@id/peixe_item_data_hora"
             app:layout_constraintTop_toBottomOf="@id/peixe_item_data_hora"
@@ -52,11 +48,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-
-            android:textColor="@android:color/holo_green_dark"
             android:textSize="18sp"
             android:textStyle="bold"
-
             app:layout_constraintEnd_toEndOf="@id/peixe_item_especie"
             app:layout_constraintStart_toStartOf="@id/peixe_item_especie"
             app:layout_constraintTop_toBottomOf="@id/peixe_item_especie"
@@ -68,8 +61,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="16dp"
-
-            android:textColor="@android:color/holo_green_dark"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -77,7 +68,6 @@
             app:layout_constraintStart_toStartOf="@id/peixe_item_tamanho"
             app:layout_constraintTop_toBottomOf="@id/peixe_item_tamanho"
             tools:text="19.99" />
-
 
         <ImageView
             android:id="@+id/peixe_item_imagem"

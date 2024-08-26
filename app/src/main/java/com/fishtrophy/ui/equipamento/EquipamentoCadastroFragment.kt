@@ -5,6 +5,8 @@ import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
@@ -20,6 +22,8 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
 
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -36,22 +40,29 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.UUID
 
 
-private const val REQUEST_IMAGE_CAPTURE = 1
+private const val REQUEST_IMAGE_CAPTURE = 3
 private const val REQUEST_SELECT_IMAGE_IN_ALBUM = 2
 
 @Suppress("DEPRECATION")
 class EquipamentoCadastroFragment : Fragment() {
-    private val args : EquipamentoCadastroFragmentArgs by navArgs()
+    private val args: EquipamentoCadastroFragmentArgs by navArgs()
     private var _binding: FragmentEquipamentoCadastroBinding? = null
     private val binding: FragmentEquipamentoCadastroBinding get() = _binding!!
-    private var idEquipamento= 0L
+    private var idEquipamento = 0L
+    private var fotoAlterada = false
     private val equipamentoDao by lazy {
         val db = AppDatabase.instancia(this.requireActivity().baseContext)
         db.equipamentoDao()
     }
+    private lateinit var imagemFile: File
+    private var imagemCaminho: String = ""
+    private var acessouGaleria = false
+    private var acessouCamera = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,17 +70,17 @@ class EquipamentoCadastroFragment : Fragment() {
 
     }
 
-    private fun criaPastaDiretorioApp(context: Context, folderName: String): File? {
+    private fun criaPastaDiretorioApp(context: Context, folderName: String): File {
         val appDirectory = context.filesDir
         val folder = File(appDirectory, folderName)
 
         return if (!folder.exists()) {
-            val isDirectoryCreated = folder.mkdir()
+            val isDirectoryCreated = folder.mkdirs()
             if (isDirectoryCreated) {
                 folder
             } else {
 
-                null
+                folder
             }
         } else {
 
@@ -90,15 +101,16 @@ class EquipamentoCadastroFragment : Fragment() {
         navView.visibility = View.GONE
 
         tentaCarregarEquipamento()
-        if(idEquipamento.toInt()!=0) {
-            buscaPeixe()
+        if (idEquipamento.toInt() != 0) {
+            buscaEquipamento()
 
         }
 
-        binding.fragmentEquipamentoCadastroImagem.setOnClickListener{
-            val direction = EquipamentoCadastroFragmentDirections.actionEquipamentoCadastroFragmentToEquipamentoImagemFragment(
-                idEquipamento.toInt()
-            )
+        binding.fragmentEquipamentoCadastroImagem.setOnClickListener {
+            val direction =
+                EquipamentoCadastroFragmentDirections.actionEquipamentoCadastroFragmentToEquipamentoImagemFragment(
+                    idEquipamento.toInt()
+                )
             findNavController().navigate(direction)
         }
 
@@ -110,9 +122,9 @@ class EquipamentoCadastroFragment : Fragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun buscaPeixe() {
+    private fun buscaEquipamento() {
         lifecycleScope.launch {
-            equipamentoDao.buscaPorId(idEquipamento).collect{ it->
+            equipamentoDao.buscaPorId(idEquipamento).collect { it ->
                 it?.let {
 
                     preencheCampos(it)
@@ -126,9 +138,9 @@ class EquipamentoCadastroFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
 
 
-        inflater.inflate(R.menu.bottom_options_menu_fragment_peixe_cadastro,menu)
+        inflater.inflate(R.menu.bottom_options_menu_fragment_peixe_cadastro, menu)
 
-        return super.onCreateOptionsMenu(menu,inflater)
+        return super.onCreateOptionsMenu(menu, inflater)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -147,13 +159,14 @@ class EquipamentoCadastroFragment : Fragment() {
         }
 
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun validaCampos(){
 
-        if(binding.fragmentEquipamentoCadastroDescricao.editText?.text.toString().isEmpty()) {
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun validaCampos() {
+
+        if (binding.fragmentEquipamentoCadastroDescricao.editText?.text.toString().isEmpty()) {
             Toast.makeText(context, "Preencha o campo Descrição", Toast.LENGTH_SHORT).show()
             binding.fragmentEquipamentoCadastroDescricao.editText?.requestFocus()
-        }else{
+        } else {
             lifecycleScope.launch {
                 tentaSalvarEquipamento()
             }
@@ -172,14 +185,16 @@ class EquipamentoCadastroFragment : Fragment() {
         try {
             val equipamento = criaEquipamento()
 
-            equipamentoDao.salva(equipamento)
+            if (idEquipamento.toInt() != 0) {
+                equipamentoDao.altera(equipamento)
+            } else {
+                equipamentoDao.salva(equipamento)
+            }
             Toast.makeText(context, "Registro salvo com sucesso! ", Toast.LENGTH_SHORT).show()
             navController.popBackStack()
         } catch (e: RuntimeException) {
             Log.e("EquipamentoCadastro", "tentaSalvarPeixe: ", e)
         }
-
-        //}
     }
 
     private fun configuraDropDownTipo() {
@@ -198,32 +213,93 @@ class EquipamentoCadastroFragment : Fragment() {
 
     }
 
-    private fun configuraBotaoFoto() {
-        val botaoFoto = binding.fragmentEquipamentoCadastroBotaoFoto
-        botaoFoto.setOnClickListener {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+    lateinit var currentPhotoPath: String
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File =
+            criaPastaDiretorioApp(this.requireActivity().baseContext, "imagens/equipamento/")
+        //getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_",
+            ".jpg",
+            storageDir
+        ).apply {
+            currentPhotoPath = absolutePath
         }
     }
+
+    fun lidaComImagemCapturada(imagePath: String): Bitmap {
+        val exifInterface = ExifInterface(imagePath)
+        val orientation = exifInterface.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )
+        val rotatedBitmap = rotacionaImagem(BitmapFactory.decodeFile(imagePath), orientation)
+        return rotatedBitmap
+    }
+
+    fun rotacionaImagem(bitmap: Bitmap, orientation: Int): Bitmap {
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
+        }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
+
+    private fun configuraBotaoFoto() {
+        val botaoFoto = binding.fragmentEquipamentoCadastroBotaoFoto
+
+        botaoFoto.setOnClickListener {
+            acessouGaleria = false
+            acessouCamera = true
+            imagemFile = createImageFile()
+            tiraFotoIntent()
+        }
+    }
+
+    private fun tiraFotoIntent() {
+
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+        val imageUri =
+            FileProvider.getUriForFile(
+                this.requireActivity().baseContext,
+                "com.fishtrophy.android.fileprovider",
+                imagemFile
+            )
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
+        startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE)
+    }
+
     private fun configuraBotaoGaleria() {
         val botaoGaleria = binding.fragmentCadastroEquipamentoBotaoGaleria
+
         botaoGaleria.setOnClickListener {
+            acessouGaleria = true
+            acessouCamera = false
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "image/*"
             startActivityForResult(intent, REQUEST_SELECT_IMAGE_IN_ALBUM)
         }
     }
 
-    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(requestCode==REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK){
-            val imageBitmap = data?.extras?.get("data") as Bitmap
-            binding.fragmentEquipamentoCadastroImagem.setImageBitmap(imageBitmap)
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            fotoAlterada = true
+            val capturedImageFileBitMap = lidaComImagemCapturada(imagemFile.toString())
+            binding.fragmentEquipamentoCadastroImagem.setImageBitmap(capturedImageFileBitMap)
+
         }
 
-        if(requestCode==REQUEST_SELECT_IMAGE_IN_ALBUM && resultCode == RESULT_OK){
+        if (requestCode == REQUEST_SELECT_IMAGE_IN_ALBUM && resultCode == RESULT_OK) {
+            fotoAlterada = true
             binding.fragmentEquipamentoCadastroImagem.setImageURI(data?.data)
         }
     }
@@ -259,26 +335,63 @@ class EquipamentoCadastroFragment : Fragment() {
             binding.fragmentEquipamentoCadastroDescricao
         val descricao = campoDescricao.editText?.text.toString()
 
-        val imgDrawable = binding.fragmentEquipamentoCadastroImagem.getDrawable()
-        if (imgDrawable != null) {
-            bitmap = (imgDrawable as BitmapDrawable).bitmap
-            val saida = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, saida)
-            val img = saida.toByteArray()
-            imgDiretorio = gravaImagemDiretorio(img)
+        if (fotoAlterada) {
+
+            if(imagemCaminho!=""){
+                deletaArquivo(imagemCaminho)
+            }
+
+            if (acessouGaleria) {
+                val imgDrawable = binding.fragmentEquipamentoCadastroImagem.getDrawable()
+                if (imgDrawable != null) {
+                    bitmap = (imgDrawable as BitmapDrawable).bitmap
+                    val saida = ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, saida)
+
+                    val img = saida.toByteArray()
+                    imgDiretorio = gravaImagemDiretorio(img)
+                }
+            } else if(acessouCamera) {
+                imgDiretorio = imagemFile.toString()
+            }
+            return Equipamento(
+                id = idEquipamento,
+                descricao = descricao,
+                tipo = tipo,
+                diretorioImagem = imgDiretorio
+            )
+        } else {
+            return Equipamento(
+                id = idEquipamento,
+                descricao = descricao,
+                tipo = tipo,
+                diretorioImagem =imagemCaminho
+            )
+        }
+    }
+
+    private fun deletaArquivo(arquivoCaminho:String){
+
+        val arquivo = File(arquivoCaminho)
+
+        if (arquivo.exists()) {
+            val deleted = arquivo.delete()
+            if (deleted) {
+
+                Log.d("FishTrophy", "Arquivo deletado")
+            } else {
+
+                Log.w("FishTrophy", "Falha ao deletar o arquivo")
+            }
+        } else {
+
+            Log.w("FishTrophy", "Arquivo não encontrado")
         }
 
-
-        return Equipamento(
-           id = idEquipamento,
-           descricao = descricao,
-           tipo = tipo,
-           diretorioImagem = imgDiretorio
-       )
     }
 
     private fun tentaCarregarEquipamento() {
-        idEquipamento= args.idEquipamento.toLong()
+        idEquipamento = args.idEquipamento.toLong()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -287,45 +400,50 @@ class EquipamentoCadastroFragment : Fragment() {
         val adapter = ArrayAdapter.createFromResource(
             this.requireActivity().baseContext,
             R.array.fragment_equipamento_cadastro_tipo_array,
-            android.R.layout.simple_spinner_item)
+            android.R.layout.simple_spinner_item
+        )
         var tipo = equipamentoCarregado.tipo
         when (equipamentoCarregado.tipo) {
             "1" -> {
-                tipo ="Isca"
+                tipo = "Isca"
             }
+
             "2" -> {
-                tipo ="Vara"
+                tipo = "Vara"
             }
+
             "3" -> {
-                tipo ="Carretilha"
+                tipo = "Carretilha"
             }
+
             "4" -> {
-                tipo ="Molinete"
+                tipo = "Molinete"
             }
         }
         val spinnerPosition: Int = adapter.getPosition(tipo)
-
+        imagemCaminho=equipamentoCarregado.diretorioImagem
         binding.fragmentEquipamentoCadastroTipo.setSelection(spinnerPosition)
         binding.fragmentEquipamentoCadastroImagem.tentaCarregarImagem(equipamentoCarregado.diretorioImagem)
         binding.fragmentEquipamentoCadastroDescricao.editText?.setText(equipamentoCarregado.descricao)
 
     }
 
-   private fun gravaImagemDiretorio( binario:ByteArray):String {
+    private fun gravaImagemDiretorio(binario: ByteArray): String {
 
-       val directory = criaPastaDiretorioApp(this.requireActivity().baseContext, "imagens/equipamento/")
-       val fileName = UUID.randomUUID().toString()
-       val file = File(directory, fileName)
+        val directory =
+            criaPastaDiretorioApp(this.requireActivity().baseContext, "imagens/equipamento/")
+        val fileName = UUID.randomUUID().toString()
+        val file = File(directory, fileName)
 
-       return try {
-           val outputStream = FileOutputStream(file)
-           outputStream.write(binario)
-           outputStream.close()
-           directory.toString()+"/"+fileName
-       } catch (e: IOException) {
-           e.printStackTrace()
-           ""
-       }
+        return try {
+            val outputStream = FileOutputStream(file)
+            outputStream.write(binario)
+            outputStream.close()
+            directory.toString() + "/" + fileName
+        } catch (e: IOException) {
+            e.printStackTrace()
+            ""
+        }
 
     }
 

@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 class ListaEquipamentoAdapter(
     private val context: Context,
     equipamento: List<Equipamento> = emptyList(),
-    var quandoClicaNoItemListener: (equipamento: Equipamento) -> Unit = {}
+    var quandoClicaNoItemListener: (equipamento: Equipamento) -> Unit = {},
 ) : RecyclerView.Adapter<ListaEquipamentoAdapter.ViewHolder>() {
 
     private var equipamentos = equipamento.toMutableList()
@@ -37,7 +37,10 @@ class ListaEquipamentoAdapter(
     private val equipamentoDao by lazy {
         AppDatabase.instancia(this.context).equipamentoDao()
     }
-
+    private val peixeDao by lazy {
+        val db = AppDatabase.instancia(this.context)
+        db.peixeDao()
+    }
 
     inner class ViewHolder(private val binding: EquipamentoItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -53,6 +56,7 @@ class ListaEquipamentoAdapter(
 
             itemView.setOnLongClickListener {
                 if (::equipamento.isInitialized) {
+
                     mostraPopup(itemView, equipamento)
                 }
                 return@setOnLongClickListener true
@@ -72,12 +76,15 @@ class ListaEquipamentoAdapter(
                 "1" -> {
                     tipo.text = "Isca"
                 }
+
                 "2" -> {
                     tipo.text = "Vara"
                 }
+
                 "3" -> {
                     tipo.text = "Carretilha"
                 }
+
                 "4" -> {
                     tipo.text = "Molinete"
                 }
@@ -121,9 +128,11 @@ class ListaEquipamentoAdapter(
     @SuppressLint("NotifyDataSetChanged")
     fun filtra(query: String) {
 
-        this.equipamentosFiltrados =
-            this.equipamentos.filter { it.descricao.contains(query, ignoreCase = true) || it.tipo.contains(query, ignoreCase = true) }
-                .toMutableList()
+        this.equipamentosFiltrados = this.equipamentos.filter {
+            it.descricao.contains(
+                query, ignoreCase = true
+            ) || it.tipo.contains(query, ignoreCase = true)
+        }.toMutableList()
 
         notifyDataSetChanged()
     }
@@ -150,14 +159,9 @@ class ListaEquipamentoAdapter(
                 R.id.menu_detalhes_lista_peixe_excluir -> {
 
 
-                    CoroutineScope(Dispatchers.Main).launch {
-
-                        equipamento.let { equipamentoDao.remove(it) }
+                    deletar(equipamento)
 
 
-                    }
-                    Toast.makeText(context, "Registro excluído com sucesso!", Toast.LENGTH_SHORT)
-                        .show()
                 }
             }
 
@@ -166,5 +170,42 @@ class ListaEquipamentoAdapter(
         popup.show()
     }
 
+    private fun deletar(equipamento: Equipamento) {
 
+        equipamento.let {
+            validaEquipamentoNaoExisteNoPeixe(it)
+        }
+
+    }
+
+    private fun validaEquipamentoNaoExisteNoPeixe(it: Equipamento) {
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            try {
+                peixeDao.buscaPeixePorEquipamento(it.id).collect { peixes ->
+                    if (peixes.isEmpty()) {
+                        equipamentoDao.remove(it)
+                        CoroutineScope(Dispatchers.Main).launch {
+                            Toast.makeText(
+                                context, "Registro excluído com sucesso!", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } else {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            Toast.makeText(
+                                context,
+                                "Este equipamento se encontra vinculado a um peixe.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Handle deletion error
+            }
+        }
+      }
 }
+
+

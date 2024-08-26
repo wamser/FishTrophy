@@ -9,6 +9,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
@@ -24,6 +26,8 @@ import android.widget.RadioButton
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
+import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
@@ -51,21 +55,25 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.math.BigDecimal
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Date
 import java.util.UUID
 
-private const val REQUEST_IMAGE_CAPTURE = 1
+private const val REQUEST_IMAGE_CAPTURE = 3
 private const val REQUEST_SELECT_IMAGE_IN_ALBUM = 2
 
-@Suppress("DEPRECATION")
-class PeixeCadastroFragment : Fragment() {
+@Suppress("DEPRECATION", "UNREACHABLE_CODE")
+class PeixeCadastroFragment : Fragment()/*, OnMapReadyCallback*/ {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     private val args: PeixeCadastroFragmentArgs by navArgs()
     private var _binding: FragmentPeixeCadastroBinding? = null
     private var preencheuAlteracao = 0L
+    private var fotoAlterada = false
     private val binding: FragmentPeixeCadastroBinding get() = _binding!!
     private var idPeixe = 0L
     private val peixeDao by lazy {
@@ -89,68 +97,59 @@ class PeixeCadastroFragment : Fragment() {
 
     private var marker: Marker? = null
 
-
     private var scrollViewPositionY: Int? = 0
 
     private var latitude = 0.0
     private var longitude = 0.0
 
+    private lateinit var imagemFile: File
+
+    private var imagemCaminho: String = ""
+
+    private var acessouGaleria = false
+    private var acessouCamera = false
+
+    private lateinit var mapView: SupportMapFragment
+
+    private var acessouLocalizacaoInserir = false
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
 
-        fusedLocationClient =
-            LocationServices.getFusedLocationProviderClient(this.requireActivity())
-        if (ActivityCompat.checkSelfPermission(
-                this.requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            requisitaAtualizacaoPosicao()
-        } else {
-            ActivityCompat.requestPermissions(
-                this.requireActivity(),
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                REQUEST_LOCATION_PERMISSION
-            )
-        }
-
     }
 
-     private fun createFolderInAppDirectory(context: Context, folderName: String): File? {
+    private fun createFolderInAppDirectory(context: Context, folderName: String): File? {
         val appDirectory = context.filesDir
         val folder = File(appDirectory, folderName)
 
-         return if (!folder.exists()) {
-             val isDirectoryCreated = folder.mkdir()
-             if (isDirectoryCreated) {
-                 folder
-             } else {
+        return if (!folder.exists()) {
+            val isDirectoryCreated = folder.mkdirs()
+            if (isDirectoryCreated) {
+                folder
+            } else {
 
-                 null
-             }
-         } else {
+                null
+            }
+        } else {
 
-             folder
-         }
+            folder
+        }
     }
-
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
-        tentaCarregarPeixe()
-        val navView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
+
         _binding = FragmentPeixeCadastroBinding.inflate(inflater, container, false)
+        val navView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
         val root: View = binding.root
 
-        val mapFragment =
-            childFragmentManager.findFragmentById(binding.fragmentPeixeTextinputlayoutMapa.id) as SupportMapFragment
+        tentaCarregarPeixe()
 
         if (imageUrl != null) {
             binding.fragmentPeixeCadastroImagem.tentaCarregarImagem(imageUrl)
@@ -168,27 +167,6 @@ class PeixeCadastroFragment : Fragment() {
             valorPadraoHoraCaptura()
         }
 
-        mapFragment.getMapAsync { googleMap ->
-            if (marker == null) {
-                adicionaMarker(googleMap,latitude, longitude)
-                posicionaMarkerNoMapa(googleMap, latitude,longitude)
-                lifecycleScope.launch {
-                    buscaPosicaoPeixe(googleMap)
-
-                }
-            }
-
-
-
-            googleMap.setOnMapClickListener {
-                val direction =
-                    PeixeCadastroFragmentDirections.actionPeixeCadastroFragmentToPeixeCadastroMapaFragment(
-                        idPeixe.toInt()
-                    )
-                findNavController().navigate(direction)
-            }
-        }
-
         binding.fragmentPeixeCadastroImagem.setOnClickListener {
             val direction =
                 PeixeCadastroFragmentDirections.actionPeixeCadastroFragmentToPeixeImagemFragment(
@@ -197,7 +175,7 @@ class PeixeCadastroFragment : Fragment() {
             findNavController().navigate(direction)
         }
 
-        binding.fragmentCadastroPeixeBotaoData.setOnClickListener{
+        binding.fragmentCadastroPeixeBotaoData.setOnClickListener {
             criarDataPicker()
         }
         binding.fragmentCadastroPeixeBotaoHora.setOnClickListener {
@@ -224,27 +202,71 @@ class PeixeCadastroFragment : Fragment() {
         configuraBotaoIsca()
         configuraBotaoRecolhimento()
         configuraBotaoVara()
+
+
+        mapView =
+            childFragmentManager.findFragmentById(binding.fragmentPeixeTextinputlayoutMapa.id) as SupportMapFragment
+        verificaPermissao()
         recebeDados()
+        mapView.getMapAsync { googleMap ->
+
+            if (marker == null) {
+
+                buscaPosicaoPeixe(googleMap)
+            }
+
+
+            googleMap.setOnMapClickListener {
+                val direction =
+                    PeixeCadastroFragmentDirections.actionPeixeCadastroFragmentToPeixeCadastroMapaFragment(
+                        idPeixe.toInt()
+                    )
+                findNavController().navigate(direction)
+            }
+        }
 
         return root
     }
 
-     override fun onSaveInstanceState(outState: Bundle) {
+    private fun verificaPermissao() {
+        fusedLocationClient =
+            LocationServices.getFusedLocationProviderClient(this.requireActivity())
+        if (idPeixe.toInt() == 0) {
+            if (!acessouLocalizacaoInserir) {
+                if (ActivityCompat.checkSelfPermission(
+                        this.requireContext(),
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    requisitaAtualizacaoPosicao()
+                } else {
+                    ActivityCompat.requestPermissions(
+                        this.requireActivity(),
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        REQUEST_LOCATION_PERMISSION
+                    )
+                    requisitaAtualizacaoPosicao()
+
+                }
+                acessouLocalizacaoInserir=true
+            }
+        }
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         scrollViewPositionY = binding.fragmentPeixeCadastroScrollview.scrollY
     }
 
     private fun recebeDados() {
 
-
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<LatLng>("position")
             ?.observe(viewLifecycleOwner) { result ->
-                val mapFragment =
-                    childFragmentManager.findFragmentById(binding.fragmentPeixeTextinputlayoutMapa.id) as SupportMapFragment
-                mapFragment.getMapAsync { googleMap ->
-                    marker?.remove()
+                //val mapFragment = childFragmentManager.findFragmentById(binding.fragmentPeixeTextinputlayoutMapa.id) as SupportMapFragment
+                mapView.getMapAsync { googleMap ->
+
                     lifecycleScope.launch {
-                        googleMap.clear()
                         adicionaMarker(googleMap, result.latitude, result.longitude)
                         posicionaMarkerNoMapa(googleMap, result.latitude, result.longitude)
 
@@ -388,7 +410,6 @@ class PeixeCadastroFragment : Fragment() {
 
     private fun buscaPosicaoPeixe(googleMap: GoogleMap) {
 
-
         lifecycleScope.launch {
             peixeDao.buscaPorId(idPeixe).collect { peixe ->
 
@@ -413,12 +434,21 @@ class PeixeCadastroFragment : Fragment() {
 
     private fun adicionaMarker(googleMap: GoogleMap, latitude: Double, longitude: Double) {
 
-        marker = googleMap.addMarker(
-            MarkerOptions()
-                .position(LatLng(latitude, longitude))
-        )
+        if (marker != null) {
+            //marker?.remove()
+            //googleMap.clear()
+            marker?.position = LatLng(latitude, longitude)
+        } else {
 
-        marker?.showInfoWindow()
+            marker = googleMap.addMarker(
+                MarkerOptions()
+                    .position(LatLng(latitude, longitude))
+            )
+
+            marker?.showInfoWindow()
+
+
+        }
 
     }
 
@@ -435,7 +465,8 @@ class PeixeCadastroFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun buscaPeixe() {
 
-        val peixeRetornado: LiveData<List<PeixeDao.PeixeWithEquipamento>> = peixeDao.buscaPorIdCompleto(idPeixe)
+        val peixeRetornado: LiveData<List<PeixeDao.PeixeWithEquipamento>> =
+            peixeDao.buscaPorIdCompleto(idPeixe)
         peixeRetornado.observe(viewLifecycleOwner) {
             preencheCampos(it!![0])
         }
@@ -527,11 +558,88 @@ class PeixeCadastroFragment : Fragment() {
         }
     }
 
+
+    lateinit var currentPhotoPath: String
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File =
+            criaPastaDiretorioApp(this.requireActivity().baseContext, "imagens/equipamento/")
+        //getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_",
+            ".jpg",
+            storageDir
+        ).apply {
+            currentPhotoPath = absolutePath
+        }
+    }
+
+    private fun criaPastaDiretorioApp(context: Context, folderName: String): File {
+        val appDirectory = context.filesDir
+        val folder = File(appDirectory, folderName)
+
+        return if (!folder.exists()) {
+            val isDirectoryCreated = folder.mkdirs()
+            if (isDirectoryCreated) {
+                folder
+            } else {
+
+                folder
+            }
+        } else {
+
+            folder
+        }
+    }
+
+    private fun tiraFotoIntent() {
+
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+        // if (imageFile != null) {
+
+        val imageUri =
+            FileProvider.getUriForFile(
+                this.requireActivity().baseContext,
+                "com.fishtrophy.android.fileprovider",
+                imagemFile
+            )
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
+        startActivityForResult(cameraIntent, com.fishtrophy.ui.peixe.REQUEST_IMAGE_CAPTURE)
+        // }
+    }
+
+    fun lidaComImagemCapturada(imagePath: String): Bitmap {
+        val exifInterface = ExifInterface(imagePath)
+        val orientation = exifInterface.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )
+        val rotatedBitmap = rotacionaImagem(BitmapFactory.decodeFile(imagePath), orientation)
+        return rotatedBitmap
+    }
+
+    fun rotacionaImagem(bitmap: Bitmap, orientation: Int): Bitmap {
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.setRotate(90f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.setRotate(180f)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.setRotate(270f)
+        }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+    }
+
+
     private fun configuraBotaoFoto() {
         val botaoFoto = binding.fragmentPeixeCadastroBotaoFoto
         botaoFoto.setOnClickListener {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+            acessouGaleria = false
+            acessouCamera = true
+            imagemFile = createImageFile()
+            tiraFotoIntent()
         }
     }
 
@@ -539,6 +647,8 @@ class PeixeCadastroFragment : Fragment() {
         val botaoGaleria = binding.fragmentCadastroPeixeBotaoGaleria
         botaoGaleria.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT)
+            acessouGaleria = true
+            acessouCamera = false
             intent.type = "image/*"
             startActivityForResult(intent, REQUEST_SELECT_IMAGE_IN_ALBUM)
         }
@@ -582,12 +692,15 @@ class PeixeCadastroFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            val imageBitmap = data?.extras?.get("data") as Bitmap
-            binding.fragmentPeixeCadastroImagem.setImageBitmap(imageBitmap)
-            this.imageBitmap = imageBitmap
+            fotoAlterada = true
+            val capturedImageFileBitMap = lidaComImagemCapturada(imagemFile.toString())
+            this.imageBitmap = capturedImageFileBitMap
+            binding.fragmentPeixeCadastroImagem.setImageBitmap(capturedImageFileBitMap)
+
         }
 
         if (requestCode == REQUEST_SELECT_IMAGE_IN_ALBUM && resultCode == RESULT_OK) {
+            fotoAlterada = true
             binding.fragmentPeixeCadastroImagem.setImageURI(data?.data)
             imageUrl = data?.data.toString()
         }
@@ -596,7 +709,7 @@ class PeixeCadastroFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SimpleDateFormat", "SuspiciousIndentation")
     private fun criaPeixe(): Peixe {
-
+        var imgDiretorio = ""
         val campoData =
             binding.fragmentPeixeCadastroDataCaptura
         val dataCaptura = campoData.editText?.text.toString()
@@ -628,32 +741,89 @@ class PeixeCadastroFragment : Fragment() {
             BigDecimal(tamanhoTexto)
         }
 
-        val bitmap = (binding.fragmentPeixeCadastroImagem.getDrawable() as BitmapDrawable).bitmap
-        val saida = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, saida)
-        val img: ByteArray = saida.toByteArray()
-
         val campoEspecie =
             binding.fragmentPeixeCadastroEspecie
         val especie = campoEspecie.editText?.text.toString()
 
-        return Peixe(
-            id = idPeixe,
-            dataCaptura = dataCapturaFormatada,
-            horaCaptura = horaCapturaFormatada,
-            peso = peso,
-            tamanho = tamanho,
-            sexo = idSexoSelecionado,
-            diretorioImagem = gravaImagemDiretorio(
-                img
-            ),
-            localizacao = LatLng(marker?.position!!.latitude, marker?.position!!.longitude),
-            idEquipamentoVara = idVaraSelecionada.toLong(),
-            idEquipamentoIsca = idIscaSelecionada.toLong(),
-            idEquipamentoRecolhimento = idRecolhimentoSelecionada.toLong(),
-            especie = especie
+        if (fotoAlterada) {
 
-        )
+            if (imagemCaminho != "") {
+                deletaArquivo(imagemCaminho)
+            }
+            if (acessouGaleria) {
+
+                val imgDrawable = binding.fragmentPeixeCadastroImagem.getDrawable()
+                if (imgDrawable != null) {
+                    val bitmap =
+                        (imgDrawable as BitmapDrawable).bitmap
+                    val saida = ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, saida)
+                    val img: ByteArray = saida.toByteArray()
+                    imgDiretorio = gravaImagemDiretorio(img)
+                }
+            } else if (acessouCamera) {
+                imgDiretorio = imagemFile.toString()
+            }
+
+            return Peixe(
+                id = idPeixe,
+                dataCaptura = dataCapturaFormatada,
+                horaCaptura = horaCapturaFormatada,
+                peso = peso,
+                tamanho = tamanho,
+                sexo = idSexoSelecionado,
+                diretorioImagem = imgDiretorio,
+                localizacao = LatLng(
+                    marker?.position!!.latitude,
+                    marker?.position!!.longitude
+                ),
+                idEquipamentoVara = idVaraSelecionada.toLong(),
+                idEquipamentoIsca = idIscaSelecionada.toLong(),
+                idEquipamentoRecolhimento = idRecolhimentoSelecionada.toLong(),
+                especie = especie
+
+            )
+        } else {
+
+            return Peixe(
+                id = idPeixe,
+                dataCaptura = dataCapturaFormatada,
+                horaCaptura = horaCapturaFormatada,
+                peso = peso,
+                tamanho = tamanho,
+                sexo = idSexoSelecionado,
+                diretorioImagem = imagemCaminho,
+                localizacao = LatLng(
+                    marker?.position!!.latitude,
+                    marker?.position!!.longitude
+                ),
+                idEquipamentoVara = idVaraSelecionada.toLong(),
+                idEquipamentoIsca = idIscaSelecionada.toLong(),
+                idEquipamentoRecolhimento = idRecolhimentoSelecionada.toLong(),
+                especie = especie
+
+            )
+
+        }
+    }
+
+    private fun deletaArquivo(arquivoCaminho: String) {
+
+        val arquivo = File(arquivoCaminho)
+
+        if (arquivo.exists()) {
+            val deleted = arquivo.delete()
+            if (deleted) {
+
+                Log.d("FishTrophy", "Arquivo deletado")
+            } else {
+
+                Log.w("FishTrophy", "Falha ao deletar o arquivo")
+            }
+        } else {
+
+            Log.w("FishTrophy", "Arquivo não encontrado")
+        }
 
     }
 
@@ -670,13 +840,17 @@ class PeixeCadastroFragment : Fragment() {
             "I" -> {
                 binding.fragmentPeixeCadastroRadioSexoIndefinido.isChecked = true
             }
+
             "M" -> {
                 binding.fragmentPeixeCadastroRadioSexoMacho.isChecked = true
             }
+
             "F" -> {
                 binding.fragmentPeixeCadastroRadioSexoFemea.isChecked = true
             }
         }
+
+        imagemCaminho = peixeCarregado.diretorioImagem
 
         val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
         val formattedDate = peixeCarregado.dataCaptura.format(formatterDate)
@@ -730,6 +904,7 @@ class PeixeCadastroFragment : Fragment() {
     }
 
     private fun requisitaAtualizacaoPosicao() {
+
         if (ActivityCompat.checkSelfPermission(
                 this.requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -743,17 +918,25 @@ class PeixeCadastroFragment : Fragment() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
 
             if (location != null) {
+
                 latitude = location.latitude
                 longitude = location.longitude
+
+                mapView.getMapAsync { googleMap ->
+
+                    adicionaMarker(googleMap, latitude, longitude)
+                    posicionaMarkerNoMapa(googleMap, latitude, longitude)
+                }
+
             }
         }
     }
 
-    @Deprecated("Deprecated in Java")
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         if (requestCode == REQUEST_LOCATION_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -768,4 +951,23 @@ class PeixeCadastroFragment : Fragment() {
     companion object {
         const val REQUEST_LOCATION_PERMISSION = 1
     }
+
+    /*override fun onMapReady(googleMap: GoogleMap) {
+        if (idPeixe.toInt() != 0) {
+            lifecycleScope.launch {
+
+                buscaPosicaoPeixe(googleMap)
+
+            }
+        }
+        googleMap.setOnMapClickListener {
+            val direction =
+                PeixeCadastroFragmentDirections.actionPeixeCadastroFragmentToPeixeCadastroMapaFragment(
+                    idPeixe.toInt()
+                )
+            findNavController().navigate(direction)
+        }
+
+    }*/
+
 }

@@ -2,12 +2,11 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_peixe_cadastro_scrollview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="16dp"
-    android:fillViewport="true"
-    android:id="@+id/fragment_peixe_cadastro_scrollview"
-    >
+    android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -54,10 +53,6 @@
             app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_imagem"
             app:srcCompat="@drawable/ic_action_photo_library"
             app:tint="@color/grey_60" />
-
-
-
-
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_peixe_cadastro_data_captura"
@@ -172,34 +167,37 @@
 
         <RadioGroup
             android:id="@+id/fragment_peixe_cadastro_radio_sexo"
-            android:checkedButton="@+id/fragment_peixe_cadastro_radio_sexo_indefinido"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:checkedButton="@+id/fragment_peixe_cadastro_radio_sexo_indefinido"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_tamanho">
+
             <TextView
                 android:id="@+id/fragment_peixe_cadastro_radio_sexo_titulo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_titulo"
-                />
+                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_titulo" />
+
             <RadioButton
                 android:id="@+id/fragment_peixe_cadastro_radio_sexo_indefinido"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_indefinido"/>
+                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_indefinido" />
+
             <RadioButton
                 android:id="@+id/fragment_peixe_cadastro_radio_sexo_macho"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_macho"/>
+                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_macho" />
+
             <RadioButton
                 android:id="@+id/fragment_peixe_cadastro_radio_sexo_femea"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_femea"/>
+                android:text="@string/title_fragment_peixe_cadastro_radio_sexo_femea" />
         </RadioGroup>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -210,8 +208,7 @@
             android:layout_margin="16dp"
             android:enabled="false"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_radio_sexo"
-            >
+            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_radio_sexo">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/fragment_peixe_textinputlayout_vara"
@@ -268,8 +265,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:enabled="false"
-            app:layout_constraintStart_toStartOf="parent"
             android:focusable="false"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_recolhimento">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -300,7 +297,7 @@
             android:tag="mapFragment"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_peixe_cadastro_isca"
+            app:layout_constraintTop_toBottomOf="@id/fragment_cadastro_peixe_botao_isca"
             tools:ignore="MissingConstraints" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

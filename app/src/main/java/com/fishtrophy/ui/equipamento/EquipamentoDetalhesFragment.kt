@@ -42,7 +42,7 @@ class EquipamentoDetalhesFragment : Fragment() {
         navView.visibility = View.GONE
         tentaCarregarEquipamento()
 
-        binding.fragmentDetalhesEquipamentoImagem.setOnClickListener{
+        binding.fragmentEquipamentoDetalhesImagem.setOnClickListener{
             val direction = EquipamentoDetalhesFragmentDirections.actionEquipamentoDetalhesFragmentToEquipamentoImagemFragment(
                 idEquipamento.toInt()
             )
@@ -93,9 +93,8 @@ class EquipamentoDetalhesFragment : Fragment() {
             }
         }
 
-        binding.fragmentDetalhesEquipamentoImagem.tentaCarregarImagem(equipamentoCarregado.diretorioImagem)
-        binding.fragmentDetalhesEquipamentoTipo.text = "Tipo: "+tipo
-        binding.fragmentDetalhesEquipamentoId.text = "ID: "+equipamentoCarregado.id.toString()
-        binding.fragmentDetalhesEquipamentoDescricao.text = "Descrição: "+equipamentoCarregado.descricao
+        binding.fragmentEquipamentoDetalhesImagem.tentaCarregarImagem(equipamentoCarregado.diretorioImagem)
+        binding.fragmentEquipamentoDetalhesTipo.text = tipo
+        binding.fragmentEquipamentoDetalhesDescricao.text = equipamentoCarregado.descricao
     }
 }
