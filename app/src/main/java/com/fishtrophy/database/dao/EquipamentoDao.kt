@@ -13,6 +13,9 @@ interface EquipamentoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun salva(vararg equipamento: Equipamento)
 
+    @Update
+    suspend fun altera(vararg equipamento: Equipamento)
+
     @Delete
     suspend fun remove(vararg equipamento: Equipamento)
 

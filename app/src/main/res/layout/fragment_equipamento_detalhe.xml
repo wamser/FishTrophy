@@ -13,65 +13,92 @@
         tools:context=".ui.fragment.DetalhesanimalFragment">
 
         <ImageView
-            android:id="@+id/fragment_detalhes_equipamento_imagem"
+            android:id="@+id/fragment_equipamento_detalhes_imagem"
             android:layout_width="0dp"
             android:layout_height="200dp"
-            android:scaleType="centerInside"
             android:background="@color/black"
+            android:scaleType="centerInside"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-
-            app:layout_constraintTop_toTopOf="parent"
-            />
-
-
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/fragment_detalhes_equipamento_tipo"
+            android:id="@+id/fragment_equipamento_detalhes_titulo_caracteristicas"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:ellipsize="end"
-
             android:maxLines="1"
-            android:textSize="28sp"
+            android:text="Características"
+            android:textSize="22sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_detalhes_equipamento_imagem"
-
-            tools:text="@tools:sample/lorem/random" />
+            app:layout_constraintTop_toBottomOf="@id/fragment_equipamento_detalhes_imagem" />
 
         <TextView
-            android:id="@+id/fragment_detalhes_equipamento_id"
+            android:id="@+id/fragment_equipamento_detalhes_titulo_descricao"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
             android:ellipsize="end"
-
             android:maxLines="1"
-            android:textSize="28sp"
+            android:text="Descrição"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_equipamento_detalhes_titulo_caracteristicas" />
+
+
+        <TextView
+            android:id="@+id/fragment_equipamento_detalhes_descricao"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_detalhes_equipamento_tipo"
+            app:layout_constraintTop_toBottomOf="@id/fragment_equipamento_detalhes_titulo_descricao"
             tools:text="@tools:sample/lorem/random" />
 
         <TextView
-            android:id="@+id/fragment_detalhes_equipamento_descricao"
+            android:id="@+id/fragment_equipamento_detalhes_titulo_tipo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
             android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Tipo"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fragment_equipamento_detalhes_descricao" />
 
-            android:maxLines="5"
-            android:textSize="28sp"
+        <TextView
+            android:id="@+id/fragment_equipamento_detalhes_tipo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/fragment_detalhes_equipamento_id"
+            app:layout_constraintTop_toBottomOf="@id/fragment_equipamento_detalhes_titulo_tipo"
+
             tools:text="@tools:sample/lorem/random" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

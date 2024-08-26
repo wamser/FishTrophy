@@ -15,6 +15,15 @@ interface PeixeDao {
     @Query("SELECT * FROM Peixe")
     fun buscaTodos(): Flow<List<Peixe>>
 
+    @Query("SELECT * FROM Peixe Where idEquipamentoVara=:id or idEquipamentoRecolhimento=:id or idEquipamentoIsca=:id")
+    fun buscaPeixePorEquipamento(id: Long): Flow<List<Peixe>>
+
+    @Query("SELECT * FROM Peixe Where idEquipamentoRecolhimento=:id")
+    fun buscaPeixePorRecolhimento(id: Long): Flow<List<Peixe>>
+
+    @Query("SELECT * FROM Peixe Where idEquipamentoIsca=:id")
+    fun buscaPeixePorIsca(id: Long): Flow<List<Peixe>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun salva(vararg peixe: Peixe)
 

@@ -145,7 +145,6 @@ class ListaPeixeAdapter(
 
                         peixe.let { peixeDao.remove(it) }
 
-
                     }
                     Toast.makeText(context, "Registro excluído com sucesso!", Toast.LENGTH_SHORT)
                         .show()

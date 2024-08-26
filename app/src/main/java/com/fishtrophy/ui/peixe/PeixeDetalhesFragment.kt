@@ -1,9 +1,11 @@
 package com.fishtrophy.ui.peixe
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -18,6 +20,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import java.time.format.DateTimeFormatter
 
 class PeixeDetalhesFragment : Fragment() {
 
@@ -40,14 +43,14 @@ class PeixeDetalhesFragment : Fragment() {
         val root: View = binding.root
         val navView = requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
         val mapFragment =
-            childFragmentManager.findFragmentById(binding.fragmentDetalhesPeixeMapa.id) as SupportMapFragment
+            childFragmentManager.findFragmentById(binding.fragmentPeixeDetalhesMapa.id) as SupportMapFragment
         tentaCarregarProduto()
 
         mapFragment.getMapAsync { googleMap ->
             buscaBuscaPosicaoPeixe(googleMap)
         }
 
-        binding.fragmentDetalhesPeixeImagem.setOnClickListener {
+        binding.fragmentPeixeDetalhesImagem.setOnClickListener {
             val direction =
                 PeixeDetalhesFragmentDirections.actionPeixeDetalhesFragmentToPeixeImagemFragment(
                     idPeixe.toInt()
@@ -76,68 +79,85 @@ class PeixeDetalhesFragment : Fragment() {
     }
 
 
-
-
-private fun tentaCarregarProduto() {
-    idPeixe = args.idPeixe.toLong()
-}
-
-private fun preencheCampos(peixeCarregado: PeixeDao.PeixeWithEquipamento) {
-
-    var sexo = ""
-
-    when (peixeCarregado.sexo) {
-        "I" -> {
-            sexo = "Indeterminado"
-        }
-        "M" -> {
-            sexo = "Macho"
-        }
-        "F" -> {
-            sexo = "Fêmea"
-        }
+    private fun tentaCarregarProduto() {
+        idPeixe = args.idPeixe.toLong()
     }
 
-    binding.fragmentDetalhesPeixeImagem.tentaCarregarImagem(peixeCarregado.diretorioImagem)
-    binding.fragmentDetalhesPeixeSexo.text = "Sexo: " + sexo
-    binding.fragmentDetalhesPeixeId.text = "ID: " + peixeCarregado.id.toString()
-    binding.fragmentDetalhesPeixeTamanho.text =
-        "Tamanho (CM): " + peixeCarregado.tamanho.formataDuasCasas()
-    binding.fragmentDetalhesPeixePeso.text =
-        "Peso (KG): " + peixeCarregado.peso.formataDuasCasas()
-}
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun preencheCampos(peixeCarregado: PeixeDao.PeixeWithEquipamento) {
 
-private fun buscaBuscaPosicaoPeixe(googleMap: GoogleMap) {
-    var peixe: PeixeDao.PeixeWithEquipamento
-    peixeDao.buscaPorIdCompleto(idPeixe).let { peixeComEquipamento ->
+        var sexo = ""
 
-        peixeComEquipamento.observe(viewLifecycleOwner) {
-            peixe = it!![0]
-            adicionaMarker(googleMap, peixe)
-            loadCameraOnMap(googleMap, peixe)
+        when (peixeCarregado.sexo) {
+            "I" -> {
+                sexo = "Indeterminado"
+            }
+
+            "M" -> {
+                sexo = "Macho"
+            }
+
+            "F" -> {
+                sexo = "Fêmea"
+            }
+        }
+
+        binding.fragmentPeixeDetalhesImagem.tentaCarregarImagem(peixeCarregado.diretorioImagem)
+
+        val formatterDate = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val formattedDate = peixeCarregado.dataCaptura.format(formatterDate)
+        val formatterTime = DateTimeFormatter.ofPattern("HH:mm:ss")
+        val formattedTime = peixeCarregado.horaCaptura.format(formatterTime)
+        binding.fragmentPeixeDetalhesDataHoraCaptura.text = formattedDate + " | " + formattedTime
+
+        binding.fragmentPeixeDetalhesEspecie.text =
+            peixeCarregado.especie
+
+        binding.fragmentPeixeDetalhesPeso.text =
+            peixeCarregado.peso.toString()
+
+        binding.fragmentPeixeDetalhesSexo.text = sexo
+
+        binding.fragmentPeixeDetalhesTamanho.text =
+            peixeCarregado.tamanho.formataDuasCasas() + " CM"
+        binding.fragmentPeixeDetalhesPeso.text =
+            peixeCarregado.peso.formataDuasCasas() + " KG"
+        binding.fragmentPeixeDetalhesVara.text = peixeCarregado.varaDescricao
+        binding.fragmentPeixeDetalhesRecolhimento.text = peixeCarregado.recolhimentoDescricao
+        binding.fragmentPeixeDetalhesIsca.text = peixeCarregado.iscaDescricao
+    }
+
+    private fun buscaBuscaPosicaoPeixe(googleMap: GoogleMap) {
+        var peixe: PeixeDao.PeixeWithEquipamento
+        peixeDao.buscaPorIdCompleto(idPeixe).let { peixeComEquipamento ->
+
+            peixeComEquipamento.observe(viewLifecycleOwner) {
+                peixe = it!![0]
+                adicionaMarker(googleMap, peixe)
+                loadCameraOnMap(googleMap, peixe)
+            }
+        }
+
+    }
+
+    private fun adicionaMarker(googleMap: GoogleMap, peixe: PeixeDao.PeixeWithEquipamento) {
+
+        val marker = googleMap.addMarker(
+            MarkerOptions()
+                .position(peixe.localizacao)
+        )
+
+        marker?.tag = peixe
+        marker?.showInfoWindow()
+
+
+    }
+
+    private fun loadCameraOnMap(googleMap: GoogleMap, peixe: PeixeDao.PeixeWithEquipamento) {
+
+        googleMap.setOnMapLoadedCallback {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(peixe.localizacao))
+            googleMap.animateCamera(CameraUpdateFactory.zoomTo(5F), 750, null)
         }
     }
-
-}
-
-private fun adicionaMarker(googleMap: GoogleMap, peixe: PeixeDao.PeixeWithEquipamento) {
-
-    val marker = googleMap.addMarker(
-        MarkerOptions()
-            .position(peixe.localizacao)
-    )
-
-    marker?.tag = peixe
-    marker?.showInfoWindow()
-
-
-}
-
-private fun loadCameraOnMap(googleMap: GoogleMap, peixe: PeixeDao.PeixeWithEquipamento) {
-
-    googleMap.setOnMapLoadedCallback {
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(peixe.localizacao))
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(5F), 750, null)
-    }
-}
 }

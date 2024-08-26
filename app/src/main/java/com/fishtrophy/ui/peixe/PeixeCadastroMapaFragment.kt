@@ -44,6 +44,7 @@ class PeixeCadastroMapaFragment : Fragment() {
     private var latitude = 0.0
     private var longitude = 0.0
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
