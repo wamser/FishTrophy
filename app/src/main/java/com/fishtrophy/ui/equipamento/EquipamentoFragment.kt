@@ -33,11 +33,12 @@ class EquipamentoFragment : Fragment() {
         db.equipamentoDao()
     }
 
-    private val adapter by lazy { ListaEquipamentoAdapter(context = this.requireContext().applicationContext) }
+    //private val adapter by lazy { ListaEquipamentoAdapter(context = this.requireContext().applicationContext) }
+    private var adapter:ListaEquipamentoAdapter?=null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
 
 
@@ -52,6 +53,11 @@ class EquipamentoFragment : Fragment() {
             }
         }
         return root
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        adapter= ListaEquipamentoAdapter(context = this.requireContext().applicationContext)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -77,7 +83,7 @@ class EquipamentoFragment : Fragment() {
 
                             if (query != null) {
 
-                                adapter.filtra(query)
+                                adapter?.filtra(query)
 
                             }
 
@@ -89,7 +95,7 @@ class EquipamentoFragment : Fragment() {
 
                             if (newText != null) {
 
-                                adapter.filtra(newText)
+                                adapter?.filtra(newText)
 
                             }
 
@@ -131,18 +137,19 @@ class EquipamentoFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        adapter=null
     }
 
     private suspend fun buscaEquipamentosUsuario() {
         equipamentoDao.buscaTodos().collect { equipamentos ->
-            adapter.atualiza(equipamentos)
+            adapter?.atualiza(equipamentos)
         }
     }
 
     private fun configuraRecyclerView() {
         val recyclerView = binding.fragmentListaEquipamentosRecyclerView
         recyclerView.setAdapter(adapter)
-        adapter.quandoClicaNoItemListener = {
+        adapter?.quandoClicaNoItemListener = {
             val direction =
                 EquipamentoFragmentDirections.actionNavigationEquipamentoToEquipamentoDetalhesFragment(
                     it.id.toInt()
