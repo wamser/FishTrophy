@@ -22,7 +22,9 @@ import com.fishtrophy.model.Equipamento
 import com.fishtrophy.ui.equipamento.EquipamentoFragmentDirections
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ListaEquipamentoAdapter(
@@ -30,6 +32,8 @@ class ListaEquipamentoAdapter(
     equipamento: List<Equipamento> = emptyList(),
     var quandoClicaNoItemListener: (equipamento: Equipamento) -> Unit = {},
 ) : RecyclerView.Adapter<ListaEquipamentoAdapter.ViewHolder>() {
+
+    lateinit var scope: CoroutineScope
 
     private var equipamentos = equipamento.toMutableList()
     private var equipamentosFiltrados = equipamento.toMutableList()
@@ -180,25 +184,28 @@ class ListaEquipamentoAdapter(
 
     private fun validaEquipamentoNaoExisteNoPeixe(it: Equipamento) {
 
-        CoroutineScope(Dispatchers.IO).launch {
+        scope = CoroutineScope(Dispatchers.IO)
+        scope.launch {
 
             try {
                 peixeDao.buscaPeixePorEquipamento(it.id).collect { peixes ->
                     if (peixes.isEmpty()) {
                         equipamentoDao.remove(it)
-                        CoroutineScope(Dispatchers.Main).launch {
+                        withContext(Dispatchers.Main) {
                             Toast.makeText(
                                 context, "Registro excluído com sucesso!", Toast.LENGTH_SHORT
                             ).show()
                         }
+                        scope.cancel()
                     } else {
-                        CoroutineScope(Dispatchers.Main).launch {
+                        withContext(Dispatchers.Main) {
                             Toast.makeText(
                                 context,
                                 "Este equipamento se encontra vinculado a um peixe.",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
+                        scope.cancel()
                     }
                 }
             } catch (e: Exception) {
